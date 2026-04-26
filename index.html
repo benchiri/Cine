@@ -23,7 +23,340 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            padding-top: 80px;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #374151;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .nav-balance {
+            background: rgba(31, 41, 55, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #374151;
+        }
+
+        .nav-balance-amount {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .deposit-btn {
+            background: #059669;
+            color: white;
+        }
+
+        .deposit-btn:hover {
+            background: #047857;
+        }
+
+        .withdraw-btn {
+            background: #dc2626;
+            color: white;
+        }
+
+        .withdraw-btn:hover {
+            background: #b91c1c;
+        }
+
+        .settings-btn {
+            background: #374151;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            padding: 0;
+        }
+
+        .settings-btn:hover {
+            background: #4b5563;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: #1f2937;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid #374151;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #60a5fa;
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .quick-amount-btn {
+            padding: 10px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .quick-amount-btn:hover {
+            background: #4b5563;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: #059669;
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background: #047857;
+        }
+
+        .modal-btn.danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-btn.danger:hover {
+            background: #b91c1c;
+        }
+
+        .transaction-history {
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #111827;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #374151;
+        }
+
+        .transaction-deposit {
+            color: #4ade80;
+        }
+
+        .transaction-withdraw {
+            color: #ef4444;
+        }
+
+        /* Settings Styles */
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #e5e7eb;
+            margin-bottom: 12px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .setting-label {
+            color: #d1d5db;
+            font-size: 14px;
+        }
+
+        .setting-description {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #059669;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        .select-input {
+            padding: 8px 12px;
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
         }
 
         .game-box {
@@ -558,6 +891,25 @@
                 { id: 3, text: "Player won 4.10x - $820", type: "cashout" },
             ]);
 
+            // New state for modals
+            const [showDeposit, setShowDeposit] = useState(false);
+            const [showWithdraw, setShowWithdraw] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const [depositAmount, setDepositAmount] = useState(100);
+            const [withdrawAmount, setWithdrawAmount] = useState(100);
+            const [transactions, setTransactions] = useState([
+                { id: 1, type: 'deposit', amount: 500, date: '2024-01-15' },
+                { id: 2, type: 'withdraw', amount: 200, date: '2024-01-14' },
+                { id: 3, type: 'deposit', amount: 1000, date: '2024-01-13' },
+            ]);
+
+            // Settings state
+            const [soundEnabled, setSoundEnabled] = useState(true);
+            const [musicEnabled, setMusicEnabled] = useState(false);
+            const [animationsEnabled, setAnimationsEnabled] = useState(true);
+            const [language, setLanguage] = useState('english');
+            const [currency, setCurrency] = useState('USD');
+
             const intervalRef = useRef(null);
             const currentMultiplierRef = useRef(1.0);
             const gameActiveRef = useRef(false);
@@ -765,194 +1117,457 @@
                 setGoldenRound(false);
             }, []);
 
+            const handleDeposit = () => {
+                if (depositAmount > 0) {
+                    setBalance(prev => prev + depositAmount);
+                    setTransactions(prev => [{
+                        id: Date.now(),
+                        type: 'deposit',
+                        amount: depositAmount,
+                        date: new Date().toISOString().split('T')[0]
+                    }, ...prev]);
+                    setShowDeposit(false);
+                    setDepositAmount(100);
+                }
+            };
+
+            const handleWithdraw = () => {
+                if (withdrawAmount > 0 && withdrawAmount <= balance) {
+                    setBalance(prev => prev - withdrawAmount);
+                    setTransactions(prev => [{
+                        id: Date.now(),
+                        type: 'withdraw',
+                        amount: withdrawAmount,
+                        date: new Date().toISOString().split('T')[0]
+                    }, ...prev]);
+                    setShowWithdraw(false);
+                    setWithdrawAmount(100);
+                } else {
+                    alert('Insufficient balance!');
+                }
+            };
+
             const quickBets = [10, 25, 50, 100, 250, 500];
             const buildingHeight = isRunning ? Math.min(multiplier * 35, 370) : 0;
 
             return (
-                <div className="game-container">
-                    <div className="game-box">
-                        <div className="header">
-                            <h1 className="title">Building Crash</h1>
-                            <div className="status-badge">
-                                <div className={`status-dot ${isRunning ? 'live' : 'waiting'}`} />
-                                <span className="status-text">{isRunning ? 'Live' : 'Waiting'}</span>
+                <>
+                    {/* Top Navigation Bar */}
+                    <div className="top-nav">
+                        <div className="nav-left">
+                            <div className="nav-logo">🎮 Crash Game</div>
+                            <div className="nav-balance">
+                                <span>💰</span>
+                                <span className="nav-balance-amount">${balance.toFixed(2)}</span>
                             </div>
                         </div>
-
-                        <div className="balance-box">
-                            <div className="balance-row">
-                                <span className="balance-label">Balance</span>
-                                <span className="balance-amount">
-                                    ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                </span>
-                            </div>
-                            {gamePhase === 'cashedout' && showResult && (
-                                <div className="profit-message">
-                                    +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
-                                </div>
-                            )}
-                            {gamePhase === 'crashed' && showResult && (
-                                <div className="loss-message">
-                                    -${betAmount.toFixed(2)}
-                                </div>
-                            )}
+                        <div className="nav-right">
+                            <button className="nav-btn deposit-btn" onClick={() => setShowDeposit(true)}>
+                                + Deposit
+                            </button>
+                            <button className="nav-btn withdraw-btn" onClick={() => setShowWithdraw(true)}>
+                                - Withdraw
+                            </button>
+                            <button className="nav-btn settings-btn" onClick={() => setShowSettings(true)}>
+                                ⚙️
+                            </button>
                         </div>
+                    </div>
 
-                        <div className="quick-bets">
-                            {quickBets.map(amount => (
-                                <button
-                                    key={amount}
-                                    onClick={() => !isRunning && setBetAmount(amount)}
-                                    disabled={isRunning}
-                                    className={`quick-bet-btn ${betAmount === amount ? 'active' : ''}`}
-                                >
-                                    ${amount}
+                    {/* Deposit Modal */}
+                    {showDeposit && (
+                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowDeposit(false)}>
+                            <div className="modal">
+                                <div className="modal-header">
+                                    <h2 className="modal-title">💎 Deposit Funds</h2>
+                                    <button className="modal-close" onClick={() => setShowDeposit(false)}>×</button>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Amount ($)</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        value={depositAmount}
+                                        onChange={(e) => setDepositAmount(Math.max(0, Number(e.target.value)))}
+                                        placeholder="Enter amount"
+                                    />
+                                </div>
+                                <div className="quick-amounts">
+                                    {[50, 100, 250, 500, 1000, 5000].map(amount => (
+                                        <button
+                                            key={amount}
+                                            className="quick-amount-btn"
+                                            onClick={() => setDepositAmount(amount)}
+                                        >
+                                            ${amount}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button className="modal-btn primary" onClick={handleDeposit}>
+                                    Deposit ${depositAmount}
                                 </button>
-                            ))}
-                        </div>
-
-                        <div className="input-group">
-                            <div className="input-wrapper">
-                                <label className="input-label">Bet Amount</label>
-                                <input
-                                    type="number"
-                                    value={betAmount}
-                                    onChange={(e) => setBetAmount(Math.max(0, Number(e.target.value)))}
-                                    disabled={isRunning}
-                                    className="game-input"
-                                />
-                            </div>
-                            <div className="input-wrapper">
-                                <label className="input-label">Auto Cashout</label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    min="1.1"
-                                    value={autoCashout}
-                                    onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
-                                    className="game-input"
-                                />
+                                <div className="transaction-history">
+                                    <h3 style={{ marginBottom: '12px', color: '#9ca3af' }}>Recent Transactions</h3>
+                                    {transactions.slice(0, 5).map(tx => (
+                                        <div key={tx.id} className="transaction-item">
+                                            <span>{tx.date}</span>
+                                            <span className={tx.type === 'deposit' ? 'transaction-deposit' : 'transaction-withdraw'}>
+                                                {tx.type === 'deposit' ? '+' : '-'}${tx.amount}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
+                    )}
 
-                        <div className="game-area">
-                            <div className="sky">
-                                {[...Array(20)].map((_, i) => (
+                    {/* Withdraw Modal */}
+                    {showWithdraw && (
+                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowWithdraw(false)}>
+                            <div className="modal">
+                                <div className="modal-header">
+                                    <h2 className="modal-title">💸 Withdraw Funds</h2>
+                                    <button className="modal-close" onClick={() => setShowWithdraw(false)}>×</button>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Available: ${balance.toFixed(2)}</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(Math.max(0, Math.min(balance, Number(e.target.value))))}
+                                        placeholder="Enter amount"
+                                    />
+                                </div>
+                                <div className="quick-amounts">
+                                    {[50, 100, 250, 500].map(amount => (
+                                        <button
+                                            key={amount}
+                                            className="quick-amount-btn"
+                                            onClick={() => setWithdrawAmount(Math.min(amount, balance))}
+                                            disabled={amount > balance}
+                                        >
+                                            ${amount}
+                                        </button>
+                                    ))}
+                                    <button
+                                        className="quick-amount-btn"
+                                        onClick={() => setWithdrawAmount(balance)}
+                                    >
+                                        Max
+                                    </button>
+                                </div>
+                                <button 
+                                    className="modal-btn danger" 
+                                    onClick={handleWithdraw}
+                                    disabled={withdrawAmount > balance}
+                                >
+                                    Withdraw ${withdrawAmount}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Settings Modal */}
+                    {showSettings && (
+                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowSettings(false)}>
+                            <div className="modal">
+                                <div className="modal-header">
+                                    <h2 className="modal-title">⚙️ Settings</h2>
+                                    <button className="modal-close" onClick={() => setShowSettings(false)}>×</button>
+                                </div>
+
+                                <div className="settings-section">
+                                    <h3 className="settings-title">Audio</h3>
+                                    <div className="setting-item">
+                                        <div>
+                                            <div className="setting-label">Sound Effects</div>
+                                            <div className="setting-description">Game sounds and notifications</div>
+                                        </div>
+                                        <label className="toggle-switch">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={soundEnabled}
+                                                onChange={(e) => setSoundEnabled(e.target.checked)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div className="setting-item">
+                                        <div>
+                                            <div className="setting-label">Background Music</div>
+                                            <div className="setting-description">Ambient music during gameplay</div>
+                                        </div>
+                                        <label className="toggle-switch">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={musicEnabled}
+                                                onChange={(e) => setMusicEnabled(e.target.checked)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="settings-section">
+                                    <h3 className="settings-title">Display</h3>
+                                    <div className="setting-item">
+                                        <div>
+                                            <div className="setting-label">Animations</div>
+                                            <div className="setting-description">Visual effects and transitions</div>
+                                        </div>
+                                        <label className="toggle-switch">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={animationsEnabled}
+                                                onChange={(e) => setAnimationsEnabled(e.target.checked)}
+                                            />
+                                            <span className="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="settings-section">
+                                    <h3 className="settings-title">Preferences</h3>
+                                    <div className="setting-item">
+                                        <div>
+                                            <div className="setting-label">Language</div>
+                                        </div>
+                                        <select 
+                                            className="select-input"
+                                            value={language}
+                                            onChange={(e) => setLanguage(e.target.value)}
+                                        >
+                                            <option value="english">English</option>
+                                            <option value="spanish">Spanish</option>
+                                            <option value="french">French</option>
+                                            <option value="german">German</option>
+                                        </select>
+                                    </div>
+                                    <div className="setting-item">
+                                        <div>
+                                            <div className="setting-label">Currency</div>
+                                        </div>
+                                        <select 
+                                            className="select-input"
+                                            value={currency}
+                                            onChange={(e) => setCurrency(e.target.value)}
+                                        >
+                                            <option value="USD">USD ($)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
+                                            <option value="JPY">JPY (¥)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="settings-section">
+                                    <h3 className="settings-title">Account</h3>
+                                    <div style={{ color: '#9ca3af', fontSize: '14px' }}>
+                                        <div className="setting-item">
+                                            <span>Total Deposited</span>
+                                            <span className="transaction-deposit">
+                                                ${transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0)}
+                                            </span>
+                                        </div>
+                                        <div className="setting-item">
+                                            <span>Total Withdrawn</span>
+                                            <span className="transaction-withdraw">
+                                                ${transactions.filter(t => t.type === 'withdraw').reduce((sum, t) => sum + t.amount, 0)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Main Game */}
+                    <div className="game-container">
+                        <div className="game-box">
+                            <div className="header">
+                                <h1 className="title">Building Crash</h1>
+                                <div className="status-badge">
+                                    <div className={`status-dot ${isRunning ? 'live' : 'waiting'}`} />
+                                    <span className="status-text">{isRunning ? 'Live' : 'Waiting'}</span>
+                                </div>
+                            </div>
+
+                            <div className="balance-box">
+                                <div className="balance-row">
+                                    <span className="balance-label">Game Balance</span>
+                                    <span className="balance-amount">
+                                        ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                                {gamePhase === 'cashedout' && showResult && (
+                                    <div className="profit-message">
+                                        +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+                                    </div>
+                                )}
+                                {gamePhase === 'crashed' && showResult && (
+                                    <div className="loss-message">
+                                        -${betAmount.toFixed(2)}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="quick-bets">
+                                {quickBets.map(amount => (
+                                    <button
+                                        key={amount}
+                                        onClick={() => !isRunning && setBetAmount(amount)}
+                                        disabled={isRunning}
+                                        className={`quick-bet-btn ${betAmount === amount ? 'active' : ''}`}
+                                    >
+                                        ${amount}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="input-group">
+                                <div className="input-wrapper">
+                                    <label className="input-label">Bet Amount</label>
+                                    <input
+                                        type="number"
+                                        value={betAmount}
+                                        onChange={(e) => setBetAmount(Math.max(0, Number(e.target.value)))}
+                                        disabled={isRunning}
+                                        className="game-input"
+                                    />
+                                </div>
+                                <div className="input-wrapper">
+                                    <label className="input-label">Auto Cashout</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        min="1.1"
+                                        value={autoCashout}
+                                        onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
+                                        className="game-input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="game-area">
+                                <div className="sky">
+                                    {[...Array(20)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="star"
+                                            style={{
+                                                left: `${Math.random() * 100}%`,
+                                                top: `${Math.random() * 60}%`,
+                                                animationDelay: `${Math.random() * 2}s`,
+                                                opacity: Math.random() * 0.5 + 0.3,
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+
+                                <div className="ground">
+                                    <div className="ground-line" />
+                                </div>
+
+                                <div className="building-container">
                                     <div
-                                        key={i}
-                                        className="star"
+                                        className={`building ${hasCrashed ? 'crashed' : ''} ${goldenRound ? 'golden' : ''}`}
                                         style={{
-                                            left: `${Math.random() * 100}%`,
-                                            top: `${Math.random() * 60}%`,
-                                            animationDelay: `${Math.random() * 2}s`,
-                                            opacity: Math.random() * 0.5 + 0.3,
+                                            height: `${buildingHeight}px`,
+                                            transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})`,
                                         }}
                                     />
-                                ))}
-                            </div>
-
-                            <div className="ground">
-                                <div className="ground-line" />
-                            </div>
-
-                            <div className="building-container">
-                                <div
-                                    className={`building ${hasCrashed ? 'crashed' : ''} ${goldenRound ? 'golden' : ''}`}
-                                    style={{
-                                        height: `${buildingHeight}px`,
-                                        transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})`,
-                                    }}
-                                />
-                            </div>
-
-                            {goldenRound && isRunning && !hasCrashed && (
-                                <div className="golden-banner">
-                                    GOLDEN ROUND
                                 </div>
-                            )}
 
-                            {isRunning && !hasCrashed && (
-                                <div className="multiplier-display">
-                                    {multiplier.toFixed(2)}x
-                                </div>
-                            )}
-
-                            {hasCrashed && showResult && (
-                                <div className="crash-overlay">
-                                    <span className="crash-emoji">&#128165;</span>
-                                    <span className="crash-text">CRASHED!</span>
-                                    <span className="crash-point">at {crashPoint?.toFixed(2)}x</span>
-                                </div>
-                            )}
-
-                            {gamePhase === 'cashedout' && showResult && !hasCrashed && (
-                                <div className="cashout-overlay">
-                                    <span className="cashout-emoji">&#127881;</span>
-                                    <span className="cashout-amount">
-                                        +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
-                                    </span>
-                                    <span className="cashout-multiplier">at {cashoutMultiplier?.toFixed(2)}x</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="buttons-container">
-                            <button
-                                onClick={showResult ? resetGame : startGame}
-                                disabled={isRunning || (betAmount > balance || betAmount <= 0)}
-                                className="start-btn"
-                            >
-                                {showResult ? 'Play Again' : isRunning ? 'Running...' : 'Place Bet'}
-                            </button>
-
-                            <button
-                                onClick={handleCashout}
-                                disabled={!isRunning || cashoutTriggeredRef.current}
-                                className="cashout-btn"
-                            >
-                                Cash Out
-                            </button>
-                        </div>
-
-                        <div className="history-section">
-                            <div className="section-title">
-                                <div className="dot blue" />
-                                Recent Rounds
-                            </div>
-                            <div className="history-list">
-                                {history.map((item, i) => {
-                                    let colorClass = 'gray';
-                                    if (item >= 10) colorClass = 'purple';
-                                    else if (item >= 5) colorClass = 'orange';
-                                    else if (item >= 2) colorClass = 'yellow';
-                                    
-                                    return (
-                                        <span key={i} className={`history-item ${colorClass}`}>
-                                            {item.toFixed(2)}x
-                                        </span>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="feed-section">
-                            <div className="section-title">
-                                <div className="dot green pulse" />
-                                Live Feed
-                            </div>
-                            <div className="feed-list">
-                                {feed.map((item) => (
-                                    <div key={item.id} className={`feed-item ${item.type}`}>
-                                        <span className="feed-icon">
-                                            {item.type === 'cashout' ? '💰' : item.type === 'crash' ? '💥' : 'ℹ️'}
-                                        </span>
-                                        <span>{item.text}</span>
+                                {goldenRound && isRunning && !hasCrashed && (
+                                    <div className="golden-banner">
+                                        GOLDEN ROUND
                                     </div>
-                                ))}
+                                )}
+
+                                {isRunning && !hasCrashed && (
+                                    <div className="multiplier-display">
+                                        {multiplier.toFixed(2)}x
+                                    </div>
+                                )}
+
+                                {hasCrashed && showResult && (
+                                    <div className="crash-overlay">
+                                        <span className="crash-emoji">&#128165;</span>
+                                        <span className="crash-text">CRASHED!</span>
+                                        <span className="crash-point">at {crashPoint?.toFixed(2)}x</span>
+                                    </div>
+                                )}
+
+                                {gamePhase === 'cashedout' && showResult && !hasCrashed && (
+                                    <div className="cashout-overlay">
+                                        <span className="cashout-emoji">&#127881;</span>
+                                        <span className="cashout-amount">
+                                            +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+                                        </span>
+                                        <span className="cashout-multiplier">at {cashoutMultiplier?.toFixed(2)}x</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="buttons-container">
+                                <button
+                                    onClick={showResult ? resetGame : startGame}
+                                    disabled={isRunning || (betAmount > balance || betAmount <= 0)}
+                                    className="start-btn"
+                                >
+                                    {showResult ? 'Play Again' : isRunning ? 'Running...' : 'Place Bet'}
+                                </button>
+
+                                <button
+                                    onClick={handleCashout}
+                                    disabled={!isRunning || cashoutTriggeredRef.current}
+                                    className="cashout-btn"
+                                >
+                                    Cash Out
+                                </button>
+                            </div>
+
+                            <div className="history-section">
+                                <div className="section-title">
+                                    <div className="dot blue" />
+                                    Recent Rounds
+                                </div>
+                                <div className="history-list">
+                                    {history.map((item, i) => {
+                                        let colorClass = 'gray';
+                                        if (item >= 10) colorClass = 'purple';
+                                        else if (item >= 5) colorClass = 'orange';
+                                        else if (item >= 2) colorClass = 'yellow';
+                                        
+                                        return (
+                                            <span key={i} className={`history-item ${colorClass}`}>
+                                                {item.toFixed(2)}x
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="feed-section">
+                                <div className="section-title">
+                                    <div className="dot green pulse" />
+                                    Live Feed
+                                </div>
+                                <div className="feed-list">
+                                    {feed.map((item) => (
+                                        <div key={item.id} className={`feed-item ${item.type}`}>
+                                            <span className="feed-icon">
+                                                {item.type === 'cashout' ? '💰' : item.type === 'crash' ? '💥' : 'ℹ️'}
+                                            </span>
+                                            <span>{item.text}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </>
             );
         }
 
@@ -960,4 +1575,4 @@
         root.render(<BuildingCrashGamePro />);
     </script>
 </body>
-</html>
+    </html>
