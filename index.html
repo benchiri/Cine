@@ -1,5 +1,219 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(to bottom, #0a0a0a, #000000)',
+    color: 'white',
+    padding: '20px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontFamily: 'Arial, sans-serif',
+  },
+  gameBox: {
+    width: '100%',
+    maxWidth: '500px',
+    background: 'rgba(17, 24, 39, 0.8)',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '24px',
+    padding: '24px',
+    border: '1px solid #374151',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    background: 'linear-gradient(to right, #60a5fa, #a78bfa)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+  },
+  statusBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  statusDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+  },
+  balanceBox: {
+    background: 'rgba(31, 41, 55, 0.5)',
+    borderRadius: '16px',
+    padding: '16px',
+    border: '1px solid #374151',
+    marginBottom: '20px',
+  },
+  balanceLabel: {
+    color: '#9ca3af',
+    fontSize: '14px',
+  },
+  balanceAmount: {
+    fontSize: '28px',
+    fontWeight: 'bold',
+    color: '#4ade80',
+  },
+  quickBets: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(6, 1fr)',
+    gap: '6px',
+    marginBottom: '12px',
+  },
+  quickBetButton: {
+    padding: '6px',
+    borderRadius: '8px',
+    border: 'none',
+    fontSize: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    color: '#9ca3af',
+    background: '#1f2937',
+  },
+  quickBetActive: {
+    background: '#2563eb',
+    color: 'white',
+  },
+  inputGroup: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  inputWrapper: {
+    position: 'relative',
+  },
+  inputLabel: {
+    color: '#9ca3af',
+    fontSize: '12px',
+    marginBottom: '6px',
+    display: 'block',
+  },
+  input: {
+    width: '100%',
+    padding: '10px 12px',
+    background: '#1f2937',
+    border: '1px solid #374151',
+    borderRadius: '12px',
+    color: 'white',
+    fontSize: '14px',
+    outline: 'none',
+    boxSizing: 'border-box',
+  },
+  gameArea: {
+    position: 'relative',
+    background: 'rgba(31, 41, 55, 0.5)',
+    borderRadius: '16px',
+    height: '400px',
+    overflow: 'hidden',
+    border: '1px solid #374151',
+    marginBottom: '20px',
+  },
+  sky: {
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(to bottom, #111827, #1f2937, #111827)',
+  },
+  ground: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '64px',
+    background: 'linear-gradient(to top, #374151, #4b5563)',
+  },
+  groundLine: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: '#6b7280',
+  },
+  buildingContainer: {
+    position: 'absolute',
+    bottom: '64px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  buttonsContainer: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  startButton: {
+    padding: '12px',
+    borderRadius: '16px',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  cashoutButton: {
+    padding: '12px',
+    borderRadius: '16px',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    background: 'linear-gradient(to right, #f59e0b, #f97316)',
+    color: 'black',
+    transition: 'all 0.2s',
+  },
+  historySection: {
+    marginBottom: '20px',
+  },
+  historyTitle: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  historyDot: {
+    width: '8px',
+    height: '8px',
+    background: '#60a5fa',
+    borderRadius: '50%',
+  },
+  historyList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '6px',
+  },
+  feedSection: {
+    marginTop: '10px',
+  },
+  feedTitle: {
+    fontSize: '14px',
+    fontWeight: 'bold',
+    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  feedDot: {
+    width: '8px',
+    height: '8px',
+    background: '#4ade80',
+    borderRadius: '50%',
+  },
+  feedList: {
+    maxHeight: '150px',
+    overflowY: 'auto',
+  },
+};
+
 export default function BuildingCrashGamePro() {
   const [balance, setBalance] = useState(1000);
   const [betAmount, setBetAmount] = useState(100);
@@ -14,9 +228,9 @@ export default function BuildingCrashGamePro() {
   const [showResult, setShowResult] = useState(false);
   const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
   const [feed, setFeed] = useState([
-    { id: 1, text: "John cashed out at 2.45x", type: "cashout", time: "2m ago" },
-    { id: 2, text: "Mike crashed at 1.21x", type: "crash", time: "3m ago" },
-    { id: 3, text: "Sarah cashed out at 4.10x", type: "cashout", time: "4m ago" },
+    { id: 1, text: "John cashed out at 2.45x", type: "cashout" },
+    { id: 2, text: "Mike crashed at 1.21x", type: "crash" },
+    { id: 3, text: "Sarah cashed out at 4.10x", type: "cashout" },
   ]);
 
   const intervalRef = useRef(null);
@@ -42,24 +256,8 @@ export default function BuildingCrashGamePro() {
     autoCashoutRef.current = autoCashout;
   }, [autoCashout]);
 
-  useEffect(() => {
-    if (!isRunning) {
-      currentMultiplierRef.current = 1.0;
-    }
-  }, [isRunning]);
-
   const safeMultiply = useCallback((a, b) => {
     return Math.round((a * b) * 100) / 100;
-  }, []);
-
-  const addToFeed = useCallback((text, type = 'info') => {
-    const newFeed = {
-      id: Date.now(),
-      text,
-      type,
-      time: 'Just now'
-    };
-    setFeed(prev => [newFeed, ...prev].slice(0, 20));
   }, []);
 
   const generateCrashPoint = useCallback(() => {
@@ -119,6 +317,7 @@ export default function BuildingCrashGamePro() {
       
       setMultiplier(newMultiplier);
 
+      // Check auto-cashout
       if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
         cashoutTriggeredRef.current = true;
         const winnings = safeMultiply(betAmountRef.current, newMultiplier);
@@ -134,11 +333,16 @@ export default function BuildingCrashGamePro() {
         
         setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
         
-        addToFeed(`You auto-cashed out at ${newMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
+        setFeed(prev => [{ 
+          id: Date.now(), 
+          text: `You auto-cashed out at ${newMultiplier.toFixed(2)}x for $${winnings}`, 
+          type: "cashout" 
+        }, ...prev].slice(0, 20));
         
         return;
       }
 
+      // Check crash
       if (newMultiplier >= point) {
         clearInterval(intervalRef.current);
         gameActiveRef.current = false;
@@ -150,10 +354,14 @@ export default function BuildingCrashGamePro() {
         
         setHistory(prev => [point, ...prev].slice(0, 8));
         
-        addToFeed(`Game crashed at ${point.toFixed(2)}x`, 'crash');
+        setFeed(prev => [{ 
+          id: Date.now(), 
+          text: `Game crashed at ${point.toFixed(2)}x`, 
+          type: "crash" 
+        }, ...prev].slice(0, 20));
       }
     }, 100);
-  }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply, addToFeed]);
+  }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply]);
 
   const handleCashout = useCallback(() => {
     if (!gameActiveRef.current || !isRunning || cashoutTriggeredRef.current) return;
@@ -173,8 +381,12 @@ export default function BuildingCrashGamePro() {
     
     setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
     
-    addToFeed(`You cashed out at ${currentMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
-  }, [isRunning, safeMultiply, addToFeed]);
+    setFeed(prev => [{ 
+      id: Date.now(), 
+      text: `You cashed out at ${currentMultiplier.toFixed(2)}x for $${winnings}`, 
+      type: "cashout" 
+    }, ...prev].slice(0, 20));
+  }, [isRunning, safeMultiply]);
 
   const resetGame = useCallback(() => {
     setShowResult(false);
@@ -186,225 +398,240 @@ export default function BuildingCrashGamePro() {
     setGoldenRound(false);
   }, []);
 
-  const getMultiplierColor = () => {
-    if (hasCrashed) return 'text-red-500';
-    if (multiplier >= 10) return 'text-purple-400';
-    if (multiplier >= 5) return 'text-orange-400';
-    if (multiplier >= 2) return 'text-yellow-400';
-    if (multiplier >= 1.5) return 'text-green-400';
-    return 'text-blue-400';
-  };
-
-  const getBuildingColor = () => {
-    if (hasCrashed) return 'bg-gradient-to-t from-red-700 to-red-400';
-    if (goldenRound) return 'bg-gradient-to-t from-yellow-600 to-yellow-300 shadow-lg shadow-yellow-500/30';
-    if (multiplier >= 5) return 'bg-gradient-to-t from-purple-600 to-purple-400';
-    if (multiplier >= 2) return 'bg-gradient-to-t from-blue-600 to-blue-400';
-    return 'bg-gradient-to-t from-cyan-600 to-cyan-400';
-  };
-
-  const buildingHeight = Math.min(multiplier * 35, 370);
-  const buildingScale = Math.max(0.6, Math.min(multiplier / 10, 1));
   const quickBets = [10, 25, 50, 100, 250, 500];
+  const buildingHeight = Math.min(currentMultiplierRef.current * 35, 370);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white p-4 flex justify-center items-center">
-      <div className="w-full max-w-lg bg-gray-900/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 space-y-4 border border-gray-800">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            🏗️ Building Crash
-          </h1>
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
-            <span className="text-sm text-gray-400">
+    <div style={styles.container}>
+      <div style={styles.gameBox}>
+        {/* Header */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>🏗️ Building Crash</h1>
+          <div style={styles.statusBadge}>
+            <div style={{
+              ...styles.statusDot,
+              background: isRunning ? '#4ade80' : '#6b7280',
+              boxShadow: isRunning ? '0 0 10px #4ade80' : 'none',
+            }} />
+            <span style={{ color: '#9ca3af', fontSize: '14px' }}>
               {isRunning ? 'Live' : 'Waiting'}
             </span>
           </div>
         </div>
 
-        <div className="bg-gray-800/50 rounded-2xl p-4 backdrop-blur-sm border border-gray-700">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400 text-sm">Balance</span>
-            <div className="text-2xl font-bold text-green-400">
+        {/* Balance */}
+        <div style={styles.balanceBox}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={styles.balanceLabel}>Balance</span>
+            <span style={styles.balanceAmount}>
               ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-            </div>
+            </span>
           </div>
           {gamePhase === 'cashedout' && showResult && (
-            <div className="mt-2 text-center text-green-400 font-bold">
+            <div style={{ textAlign: 'center', color: '#4ade80', fontWeight: 'bold', marginTop: '8px' }}>
               +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
             </div>
           )}
           {gamePhase === 'crashed' && showResult && (
-            <div className="mt-2 text-center text-red-400 font-bold">
+            <div style={{ textAlign: 'center', color: '#ef4444', fontWeight: 'bold', marginTop: '8px' }}>
               -${betAmount.toFixed(2)}
             </div>
           )}
         </div>
 
-        <div className="space-y-3">
-          <div className="grid grid-cols-6 gap-1.5">
-            {quickBets.map(amount => (
-              <button
-                key={amount}
-                onClick={() => !isRunning && setBetAmount(amount)}
-                disabled={isRunning}
-                className={`py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  betAmount === amount 
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                ${amount}
-              </button>
-            ))}
+        {/* Quick Bets */}
+        <div style={styles.quickBets}>
+          {quickBets.map(amount => (
+            <button
+              key={amount}
+              onClick={() => !isRunning && setBetAmount(amount)}
+              disabled={isRunning}
+              style={{
+                ...styles.quickBetButton,
+                ...(betAmount === amount ? styles.quickBetActive : {}),
+                opacity: isRunning ? 0.5 : 1,
+                cursor: isRunning ? 'not-allowed' : 'pointer',
+              }}
+            >
+              ${amount}
+            </button>
+          ))}
+        </div>
+
+        {/* Input Fields */}
+        <div style={styles.inputGroup}>
+          <div style={styles.inputWrapper}>
+            <label style={styles.inputLabel}>Bet Amount</label>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(Math.max(0, Number(e.target.value)))}
+              disabled={isRunning}
+              style={{
+                ...styles.input,
+                opacity: isRunning ? 0.5 : 1,
+                cursor: isRunning ? 'not-allowed' : 'text',
+              }}
+            />
           </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Bet Amount</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                <input
-                  type="number"
-                  value={betAmount}
-                  onChange={(e) => {
-                    const value = Math.max(0, Number(e.target.value));
-                    setBetAmount(value);
-                  }}
-                  disabled={isRunning}
-                  className="w-full pl-7 pr-3 py-2.5 bg-gray-800 rounded-xl border border-gray-700 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Auto Cashout</label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.1"
-                  min="1.1"
-                  value={autoCashout}
-                  onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
-                  className="w-full px-3 py-2.5 bg-gray-800 rounded-xl border border-gray-700 focus:border-blue-500 focus:outline-none"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">x</span>
-              </div>
-            </div>
+          <div style={styles.inputWrapper}>
+            <label style={styles.inputLabel}>Auto Cashout</label>
+            <input
+              type="number"
+              step="0.1"
+              min="1.1"
+              value={autoCashout}
+              onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
+              style={styles.input}
+            />
           </div>
         </div>
 
-        <div className="relative bg-gray-800/50 rounded-2xl h-[400px] overflow-hidden border border-gray-700">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+        {/* Game Area */}
+        <div style={styles.gameArea}>
+          <div style={styles.sky}>
+            {/* Stars */}
             {[...Array(20)].map((_, i) => (
               <div
                 key={i}
-                className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
                 style={{
+                  position: 'absolute',
+                  width: '2px',
+                  height: '2px',
+                  background: 'white',
+                  borderRadius: '50%',
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 60}%`,
+                  opacity: Math.random() * 0.5 + 0.3,
+                  animation: 'pulse 2s infinite',
                   animationDelay: `${Math.random() * 2}s`,
-                  opacity: Math.random() * 0.5 + 0.3
                 }}
               />
             ))}
           </div>
 
-          <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-gray-700 to-gray-600">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500" />
+          <div style={styles.ground}>
+            <div style={styles.groundLine} />
           </div>
 
-          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-end justify-center">
+          {/* Building */}
+          <div style={styles.buildingContainer}>
             <div
-              className={`w-28 rounded-t-lg transition-all duration-300 ease-out relative ${getBuildingColor()} ${hasCrashed ? 'animate-shake' : ''}`}
               style={{
-                height: `${buildingHeight}px`,
-                transform: `scaleX(${buildingScale})`,
-                transformOrigin: 'bottom center'
+                width: '100px',
+                borderRadius: '8px 8px 0 0',
+                height: `${isRunning ? multiplier * 35 : 0}px`,
+                maxHeight: '370px',
+                background: hasCrashed 
+                  ? 'linear-gradient(to top, #dc2626, #f87171)'
+                  : goldenRound
+                    ? 'linear-gradient(to top, #d97706, #fbbf24)'
+                    : 'linear-gradient(to top, #2563eb, #60a5fa)',
+                transition: 'height 0.1s linear',
+                transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})`,
+                transformOrigin: 'bottom center',
+                boxShadow: goldenRound ? '0 0 20px rgba(251, 191, 36, 0.3)' : 'none',
               }}
-            >
-              {!hasCrashed && buildingHeight > 40 && (
-                <div className="absolute inset-0 overflow-hidden">
-                  {Array.from({ length: Math.floor(buildingHeight / 35) }).map((_, floor) => (
-                    <div key={floor} className="flex justify-around py-1.5">
-                      {[0, 1].map((window) => (
-                        <div
-                          key={window}
-                          className={`w-5 h-4 rounded-sm transition-colors ${
-                            goldenRound ? 'bg-yellow-300/80' : 'bg-blue-200/80'
-                          } ${multiplier > 2 ? 'animate-pulse' : ''}`}
-                          style={{
-                            animationDelay: `${floor * 0.1}s`
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {!hasCrashed && buildingHeight > 20 && (
-                <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full ${
-                  goldenRound ? 'bg-yellow-400' : 'bg-blue-400'
-                }`} />
-              )}
-            </div>
+            />
           </div>
 
+          {/* Golden Round Banner */}
           {goldenRound && isRunning && !hasCrashed && (
-            <div className="absolute top-4 left-0 right-0 flex justify-center">
-              <div className="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-4 py-1 rounded-full font-bold text-sm animate-bounce">
-                ⭐ GOLDEN ROUND ⭐
-              </div>
+            <div style={{
+              position: 'absolute',
+              top: '16px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(to right, #d97706, #fbbf24)',
+              color: 'black',
+              padding: '4px 16px',
+              borderRadius: '20px',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              animation: 'bounce 1s infinite',
+            }}>
+              ⭐ GOLDEN ROUND ⭐
             </div>
           )}
 
+          {/* Multiplier Display */}
           {isRunning && !hasCrashed && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-              <div className={`text-6xl font-black ${getMultiplierColor()} transition-colors`}>
-                {multiplier.toFixed(2)}x
-              </div>
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '60px',
+              fontWeight: '900',
+              color: multiplier >= 2 ? '#fbbf24' : '#60a5fa',
+            }}>
+              {multiplier.toFixed(2)}x
             </div>
           )}
 
+          {/* Crash Overlay */}
           {hasCrashed && showResult && (
-            <div className="absolute inset-0 bg-red-900/60 backdrop-blur-sm flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">💥</div>
-                <div className="text-4xl font-black text-red-400 animate-bounce">
-                  CRASHED!
-                </div>
-                <div className="text-xl text-red-300 mt-2">
-                  at {crashPoint?.toFixed(2)}x
-                </div>
-              </div>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(185, 28, 28, 0.6)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: '60px' }}>💥</span>
+              <span style={{ fontSize: '40px', fontWeight: '900', color: '#fca5a5', animation: 'bounce 1s infinite' }}>
+                CRASHED!
+              </span>
+              <span style={{ fontSize: '20px', color: '#fca5a5', marginTop: '8px' }}>
+                at {crashPoint?.toFixed(2)}x
+              </span>
             </div>
           )}
 
+          {/* Cashout Overlay */}
           {gamePhase === 'cashedout' && showResult && !hasCrashed && (
-            <div className="absolute inset-0 bg-green-900/40 backdrop-blur-sm flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🎉</div>
-                <div className="text-4xl font-black text-green-400">
-                  +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
-                </div>
-                <div className="text-xl text-green-300 mt-2">
-                  at {cashoutMultiplier?.toFixed(2)}x
-                </div>
-              </div>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(22, 163, 74, 0.4)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: '60px' }}>🎉</span>
+              <span style={{ fontSize: '40px', fontWeight: '900', color: '#4ade80' }}>
+                +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+              </span>
+              <span style={{ fontSize: '20px', color: '#4ade80', marginTop: '8px' }}>
+                at {cashoutMultiplier?.toFixed(2)}x
+              </span>
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        {/* Action Buttons */}
+        <div style={styles.buttonsContainer}>
           <button
             onClick={showResult ? resetGame : startGame}
             disabled={isRunning || (betAmount > balance || betAmount <= 0)}
-            className={`py-3 rounded-2xl font-bold text-lg transition-all transform active:scale-95 ${
-              showResult
-                ? 'bg-gray-600 hover:bg-gray-500'
-                : 'bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed'
-            }`}
+            style={{
+              ...styles.startButton,
+              background: showResult ? '#4b5563' : '#059669',
+              color: 'white',
+              opacity: (!showResult && (isRunning || betAmount > balance || betAmount <= 0)) ? 0.5 : 1,
+              cursor: (!showResult && (isRunning || betAmount > balance || betAmount <= 0)) ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              if (!e.target.disabled) e.target.style.opacity = '0.9';
+            }}
+            onMouseLeave={(e) => {
+              if (!e.target.disabled) e.target.style.opacity = '1';
+            }}
           >
             {showResult ? '🔄 Play Again' : isRunning ? '🏃 Running...' : '🎮 Place Bet'}
           </button>
@@ -412,79 +639,103 @@ export default function BuildingCrashGamePro() {
           <button
             onClick={handleCashout}
             disabled={!isRunning || cashoutTriggeredRef.current}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black py-3 rounded-2xl font-bold text-lg transition-all transform active:scale-95 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            style={{
+              ...styles.cashoutButton,
+              opacity: (!isRunning || cashoutTriggeredRef.current) ? 0.5 : 1,
+              cursor: (!isRunning || cashoutTriggeredRef.current) ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              if (!e.target.disabled) e.target.style.opacity = '0.9';
+            }}
+            onMouseLeave={(e) => {
+              if (!e.target.disabled) e.target.style.opacity = '1';
+            }}
           >
             💰 Cash Out
           </button>
         </div>
 
-        {crashPoint && (gamePhase === 'crashed' || gamePhase === 'cashedout') && (
-          <div className="bg-gray-800/50 rounded-xl p-3 text-center text-sm border border-gray-700">
-            <span className="text-gray-400">
-              {goldenRound ? '⭐ Golden Round - ' : ''}
-              Crashed at: <span className="text-red-400 font-bold">{crashPoint.toFixed(2)}x</span>
-            </span>
-          </div>
-        )}
-
-        <div>
-          <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
-            <span className="w-2 h-2 bg-blue-400 rounded-full" />
+        {/* History */}
+        <div style={styles.historySection}>
+          <div style={styles.historyTitle}>
+            <div style={styles.historyDot} />
             Recent Rounds
-          </h2>
-          <div className="flex flex-wrap gap-1.5">
-            {history.map((item, i) => (
-              <span
-                key={i}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-                  item >= 10 ? 'bg-purple-900/50 text-purple-300 border border-purple-800' :
-                  item >= 5 ? 'bg-orange-900/50 text-orange-300 border border-orange-800' :
-                  item >= 2 ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-800' :
-                  'bg-gray-700/50 text-gray-300 border border-gray-600'
-                }`}
-              >
-                {item.toFixed(2)}x
-              </span>
-            ))}
+          </div>
+          <div style={styles.historyList}>
+            {history.map((item, i) => {
+              let bgColor = '#374151';
+              if (item >= 10) bgColor = 'rgba(88, 28, 135, 0.5)';
+              else if (item >= 5) bgColor = 'rgba(154, 52, 18, 0.5)';
+              else if (item >= 2) bgColor = 'rgba(113, 63, 18, 0.5)';
+              
+              return (
+                <span
+                  key={i}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    background: bgColor,
+                    border: '1px solid #4b5563',
+                  }}
+                >
+                  {item.toFixed(2)}x
+                </span>
+              );
+            })}
           </div>
         </div>
 
-        <div>
-          <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+        {/* Live Feed */}
+        <div style={styles.feedSection}>
+          <div style={styles.feedTitle}>
+            <div style={{
+              ...styles.feedDot,
+              animation: 'pulse 1s infinite',
+            }} />
             Live Feed
-          </h2>
-          <div className="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
+          </div>
+          <div style={{ ...styles.feedList, scrollbarWidth: 'thin' }}>
             {feed.map((item) => (
               <div
                 key={item.id}
-                className={`p-2 rounded-lg text-xs flex items-center gap-2 animate-fadeIn ${
-                  item.type === 'cashout' ? 'bg-green-900/20 border border-green-800/50' :
-                  item.type === 'crash' ? 'bg-red-900/20 border border-red-800/50' :
-                  'bg-gray-800/50 border border-gray-700/50'
-                }`}
+                style={{
+                  padding: '8px',
+                  marginBottom: '6px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: item.type === 'cashout' 
+                    ? 'rgba(22, 163, 74, 0.1)' 
+                    : item.type === 'crash' 
+                      ? 'rgba(220, 38, 38, 0.1)' 
+                      : 'rgba(31, 41, 55, 0.5)',
+                  border: `1px solid ${item.type === 'cashout' ? 'rgba(22, 163, 74, 0.3)' : item.type === 'crash' ? 'rgba(220, 38, 38, 0.3)' : '#374151'}`,
+                }}
               >
-                <span className="text-lg">
+                <span style={{ fontSize: '16px' }}>
                   {item.type === 'cashout' ? '💚' : item.type === 'crash' ? '💔' : 'ℹ️'}
                 </span>
-                <span className="flex-1">{item.text}</span>
-                <span className="text-gray-500 text-[10px]">{item.time}</span>
+                <span>{item.text}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
+      {/* CSS Animations */}
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
         }
         
         @keyframes shake {
@@ -493,29 +744,14 @@ export default function BuildingCrashGamePro() {
           20%, 40%, 60%, 80% { transform: translateX(4px); }
         }
         
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
         }
         
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
+        input[type=number] {
+          -moz-appearance: textfield;
         }
       `}</style>
     </div>
