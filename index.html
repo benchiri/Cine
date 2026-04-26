@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: #000; color: #fff; }
         .game-container { min-height: 100vh; background: radial-gradient(ellipse at top, #1a1a3e, #0a0a1a); 
-            padding: 10px; display: flex; flex-direction: column; align-items: center; padding-top: 120px; }
+            padding: 10px; display: flex; flex-direction: column; align-items: center; padding-top: 80px; }
 
         /* Refer banner */
         .refer-banner {
@@ -42,12 +42,6 @@
         .deposit-icon { background: #f59e0b; color: black; }
         .withdraw-icon { background: #10b981; color: white; }
         .settings-icon { background: rgba(255,255,255,0.2); color: white; }
-
-        .live-users-bar { position: fixed; top: 56px; left: 0; right: 0; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px); padding: 4px 10px; display: flex; align-items: center; gap: 8px;
-            overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 999; font-size: 11px; }
-        .live-user-badge { background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 10px; white-space: nowrap; }
-        .live-user-bet { color: #fbbf24; font-weight: 700; }
 
         .game-box { width: 100%; max-width: 480px; background: rgba(20,20,40,0.9); backdrop-filter: blur(20px);
             border-radius: 20px; padding: 16px; border: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
@@ -337,13 +331,6 @@ function BuildingCrashGamePro() {
                 </div>
             )}
 
-            <div className="live-users-bar">
-                <span style={{color:'#ef4444',fontWeight:700}}>🔴 {fakePlayers.length + (userBetPlaced ? 1 : 0)} online</span>
-                {fakePlayers.slice(0,8).map((p,i) => (
-                    <div key={i} className="live-user-badge"><span>{p.name}</span> <span className="live-user-bet">{format(p.bet)}</span></div>
-                ))}
-            </div>
-
             {depositStep !== 'hidden' && (
                 <div className="mpesa-modal">
                     <div className="mpesa-card">
@@ -448,7 +435,6 @@ function BuildingCrashGamePro() {
                         <button className="cashout-btn" disabled style={{opacity:0.3}}>Spectate</button>
                     </div>
 
-                    {/* Bet controls moved below buttons */}
                     <div className="bet-controls-bottom">
                         <div className="input-group">
                             <div>
@@ -467,7 +453,6 @@ function BuildingCrashGamePro() {
                         </div>
                     </div>
 
-                    {/* Players panel now below bet controls */}
                     <div className="players-panel">
                         <div style={{fontWeight:700, marginBottom:4}}>👥 Players</div>
                         {fakePlayers.map((p,i) => (
