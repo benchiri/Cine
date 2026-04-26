@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 export default function BuildingCrashGamePro() {
-  // Game State
   const [balance, setBalance] = useState(1000);
   const [betAmount, setBetAmount] = useState(100);
   const [autoCashout, setAutoCashout] = useState(2.0);
@@ -11,18 +10,15 @@ export default function BuildingCrashGamePro() {
   const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
   const [crashPoint, setCrashPoint] = useState(null);
   const [goldenRound, setGoldenRound] = useState(false);
-  const [gamePhase, setGamePhase] = useState('idle'); // idle, running, cashedout, crashed
+  const [gamePhase, setGamePhase] = useState('idle');
   const [showResult, setShowResult] = useState(false);
-  
-  // History & Feed
   const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
   const [feed, setFeed] = useState([
     { id: 1, text: "John cashed out at 2.45x", type: "cashout", time: "2m ago" },
     { id: 2, text: "Mike crashed at 1.21x", type: "crash", time: "3m ago" },
     { id: 3, text: "Sarah cashed out at 4.10x", type: "cashout", time: "4m ago" },
   ]);
-  
-  // Refs
+
   const intervalRef = useRef(null);
   const currentMultiplierRef = useRef(1.0);
   const gameActiveRef = useRef(false);
@@ -30,7 +26,6 @@ export default function BuildingCrashGamePro() {
   const autoCashoutRef = useRef(2.0);
   const cashoutTriggeredRef = useRef(false);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -39,7 +34,6 @@ export default function BuildingCrashGamePro() {
     };
   }, []);
 
-  // Keep refs in sync with state
   useEffect(() => {
     betAmountRef.current = betAmount;
   }, [betAmount]);
@@ -48,14 +42,12 @@ export default function BuildingCrashGamePro() {
     autoCashoutRef.current = autoCashout;
   }, [autoCashout]);
 
-  // Reset current multiplier ref when game starts/stops
   useEffect(() => {
     if (!isRunning) {
       currentMultiplierRef.current = 1.0;
     }
   }, [isRunning]);
 
-  // Helper functions
   const safeMultiply = useCallback((a, b) => {
     return Math.round((a * b) * 100) / 100;
   }, []);
@@ -71,20 +63,15 @@ export default function BuildingCrashGamePro() {
   }, []);
 
   const generateCrashPoint = useCallback(() => {
-    // More realistic crash point distribution
     const rand = Math.random();
-    const isGolden = rand < 0.12; // 12% chance of golden round
+    const isGolden = rand < 0.12;
     
     let point;
     if (isGolden) {
-      // Golden rounds: 10x to 50x
       point = 10 + Math.random() * 40;
     } else {
-      // Normal distribution favoring lower multipliers
-      // Using exponential distribution for realistic crash game feel
-      const houseEdge = 0.97; // 3% house edge
+      const houseEdge = 0.97;
       point = Math.max(1.2, (1 / (1 - Math.random())) * houseEdge);
-      // Cap at 10x for non-golden rounds
       point = Math.min(point, 10);
     }
     
@@ -95,7 +82,6 @@ export default function BuildingCrashGamePro() {
   }, []);
 
   const startGame = useCallback(() => {
-    // Validation
     if (gameActiveRef.current || isRunning) return;
     if (betAmount <= 0 || betAmount > balance) {
       alert(betAmount <= 0 ? "Please enter a bet amount" : "Insufficient balance!");
@@ -104,7 +90,6 @@ export default function BuildingCrashGamePro() {
 
     const { point, isGolden } = generateCrashPoint();
     
-    // Reset all game state
     currentMultiplierRef.current = 1.0;
     cashoutTriggeredRef.current = false;
     gameActiveRef.current = true;
@@ -119,12 +104,10 @@ export default function BuildingCrashGamePro() {
     setGamePhase('running');
     setShowResult(false);
 
-    // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
-    // Start game loop
     intervalRef.current = setInterval(() => {
       if (!gameActiveRef.current) {
         clearInterval(intervalRef.current);
@@ -134,51 +117,42 @@ export default function BuildingCrashGamePro() {
       const newMultiplier = Math.round((currentMultiplierRef.current + 0.05) * 100) / 100;
       currentMultiplierRef.current = newMultiplier;
       
-      // Update multiplier state (batching for performance)
       setMultiplier(newMultiplier);
 
-      // Check auto-cashout
       if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
         cashoutTriggeredRef.current = true;
         const winnings = safeMultiply(betAmountRef.current, newMultiplier);
         
-        // Stop the game
         clearInterval(intervalRef.current);
         gameActiveRef.current = false;
         
-        // Update all states
         setBalance(prev => prev + winnings);
         setCashoutMultiplier(newMultiplier);
         setIsRunning(false);
         setGamePhase('cashedout');
         setShowResult(true);
         
-        // Update history
         setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
         
-        // Add to feed
         addToFeed(`You auto-cashed out at ${newMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
         
         return;
       }
 
-      // Check crash
       if (newMultiplier >= point) {
         clearInterval(intervalRef.current);
         gameActiveRef.current = false;
         
-        // Set crash state
         setHasCrashed(true);
         setIsRunning(false);
         setGamePhase('crashed');
         setShowResult(true);
         
-        // Update history with crash point
         setHistory(prev => [point, ...prev].slice(0, 8));
         
         addToFeed(`Game crashed at ${point.toFixed(2)}x`, 'crash');
       }
-    }, 100); // Slightly faster updates for smoother animation
+    }, 100);
   }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply, addToFeed]);
 
   const handleCashout = useCallback(() => {
@@ -188,18 +162,15 @@ export default function BuildingCrashGamePro() {
     const currentMultiplier = currentMultiplierRef.current;
     const winnings = safeMultiply(betAmountRef.current, currentMultiplier);
     
-    // Stop the game immediately
     clearInterval(intervalRef.current);
     gameActiveRef.current = false;
     
-    // Update states
     setBalance(prev => prev + winnings);
     setCashoutMultiplier(currentMultiplier);
     setIsRunning(false);
     setGamePhase('cashedout');
     setShowResult(true);
     
-    // Update history
     setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
     
     addToFeed(`You cashed out at ${currentMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
@@ -215,10 +186,9 @@ export default function BuildingCrashGamePro() {
     setGoldenRound(false);
   }, []);
 
-  // Calculate dynamic colors based on multiplier
   const getMultiplierColor = () => {
     if (hasCrashed) return 'text-red-500';
-    if (multiplier >= 10) return 'text-purple-400 animate-pulse';
+    if (multiplier >= 10) return 'text-purple-400';
     if (multiplier >= 5) return 'text-orange-400';
     if (multiplier >= 2) return 'text-yellow-400';
     if (multiplier >= 1.5) return 'text-green-400';
@@ -233,17 +203,13 @@ export default function BuildingCrashGamePro() {
     return 'bg-gradient-to-t from-cyan-600 to-cyan-400';
   };
 
-  // Building animation
-  const buildingHeight = Math.min(multiplier * 35, 430);
-  const buildingScale = Math.min(multiplier / 10, 1);
-
-  // Quick bet amounts
+  const buildingHeight = Math.min(multiplier * 35, 370);
+  const buildingScale = Math.max(0.6, Math.min(multiplier / 10, 1));
   const quickBets = [10, 25, 50, 100, 250, 500];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white p-4 flex justify-center items-center">
       <div className="w-full max-w-lg bg-gray-900/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 space-y-4 border border-gray-800">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             🏗️ Building Crash
@@ -256,7 +222,6 @@ export default function BuildingCrashGamePro() {
           </div>
         </div>
 
-        {/* Balance Display */}
         <div className="bg-gray-800/50 rounded-2xl p-4 backdrop-blur-sm border border-gray-700">
           <div className="flex items-center justify-between">
             <span className="text-gray-400 text-sm">Balance</span>
@@ -276,9 +241,7 @@ export default function BuildingCrashGamePro() {
           )}
         </div>
 
-        {/* Bet Controls */}
         <div className="space-y-3">
-          {/* Quick Bet Buttons */}
           <div className="grid grid-cols-6 gap-1.5">
             {quickBets.map(amount => (
               <button
@@ -331,11 +294,8 @@ export default function BuildingCrashGamePro() {
           </div>
         </div>
 
-        {/* Game Area */}
         <div className="relative bg-gray-800/50 rounded-2xl h-[400px] overflow-hidden border border-gray-700">
-          {/* Sky background with stars */}
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-            {/* Stars */}
             {[...Array(20)].map((_, i) => (
               <div
                 key={i}
@@ -350,26 +310,19 @@ export default function BuildingCrashGamePro() {
             ))}
           </div>
 
-          {/* Ground */}
           <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-gray-700 to-gray-600">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500" />
           </div>
 
-          {/* Building Container */}
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-end justify-center">
-            {/* Building */}
             <div
-              className={`w-28 rounded-t-lg transition-all duration-300 ease-out relative ${
-                getBuildingColor()
-              } ${hasCrashed ? 'animate-shake' : ''}`}
+              className={`w-28 rounded-t-lg transition-all duration-300 ease-out relative ${getBuildingColor()} ${hasCrashed ? 'animate-shake' : ''}`}
               style={{
                 height: `${buildingHeight}px`,
-                maxHeight: '370px',
                 transform: `scaleX(${buildingScale})`,
                 transformOrigin: 'bottom center'
               }}
             >
-              {/* Building windows */}
               {!hasCrashed && buildingHeight > 40 && (
                 <div className="absolute inset-0 overflow-hidden">
                   {Array.from({ length: Math.floor(buildingHeight / 35) }).map((_, floor) => (
@@ -390,7 +343,6 @@ export default function BuildingCrashGamePro() {
                 </div>
               )}
 
-              {/* Building top decoration */}
               {!hasCrashed && buildingHeight > 20 && (
                 <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full ${
                   goldenRound ? 'bg-yellow-400' : 'bg-blue-400'
@@ -399,7 +351,6 @@ export default function BuildingCrashGamePro() {
             </div>
           </div>
 
-          {/* Golden Round Banner */}
           {goldenRound && isRunning && !hasCrashed && (
             <div className="absolute top-4 left-0 right-0 flex justify-center">
               <div className="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-4 py-1 rounded-full font-bold text-sm animate-bounce">
@@ -408,18 +359,14 @@ export default function BuildingCrashGamePro() {
             </div>
           )}
 
-          {/* Multiplier Display */}
-          {isRunning && (
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center ${
-              hasCrashed ? 'hidden' : ''
-            }`}>
+          {isRunning && !hasCrashed && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
               <div className={`text-6xl font-black ${getMultiplierColor()} transition-colors`}>
                 {multiplier.toFixed(2)}x
               </div>
             </div>
           )}
 
-          {/* Crash Overlay */}
           {hasCrashed && showResult && (
             <div className="absolute inset-0 bg-red-900/60 backdrop-blur-sm flex items-center justify-center">
               <div className="text-center">
@@ -434,7 +381,6 @@ export default function BuildingCrashGamePro() {
             </div>
           )}
 
-          {/* Cashout Overlay */}
           {gamePhase === 'cashedout' && showResult && !hasCrashed && (
             <div className="absolute inset-0 bg-green-900/40 backdrop-blur-sm flex items-center justify-center">
               <div className="text-center">
@@ -450,7 +396,6 @@ export default function BuildingCrashGamePro() {
           )}
         </div>
 
-        {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={showResult ? resetGame : startGame}
@@ -473,7 +418,6 @@ export default function BuildingCrashGamePro() {
           </button>
         </div>
 
-        {/* Game Stats */}
         {crashPoint && (gamePhase === 'crashed' || gamePhase === 'cashedout') && (
           <div className="bg-gray-800/50 rounded-xl p-3 text-center text-sm border border-gray-700">
             <span className="text-gray-400">
@@ -483,7 +427,6 @@ export default function BuildingCrashGamePro() {
           </div>
         )}
 
-        {/* History */}
         <div>
           <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
             <span className="w-2 h-2 bg-blue-400 rounded-full" />
@@ -506,7 +449,6 @@ export default function BuildingCrashGamePro() {
           </div>
         </div>
 
-        {/* Live Feed */}
         <div>
           <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
             <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -522,10 +464,7 @@ export default function BuildingCrashGamePro() {
                   'bg-gray-800/50 border border-gray-700/50'
                 }`}
               >
-                <span className={`text-lg ${
-                  item.type === 'cashout' ? '' :
-                  item.type === 'crash' ? '' : ''
-                }`}>
+                <span className="text-lg">
                   {item.type === 'cashout' ? '💚' : item.type === 'crash' ? '💔' : 'ℹ️'}
                 </span>
                 <span className="flex-1">{item.text}</span>
