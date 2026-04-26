@@ -239,6 +239,8 @@ export default function BuildingCrashGamePro() {
   const betAmountRef = useRef(100);
   const autoCashoutRef = useRef(2.0);
   const cashoutTriggeredRef = useRef(false);
+  const consecutiveLossesRef = useRef(0);
+  const playerLifetimeProfitRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -261,23 +263,66 @@ export default function BuildingCrashGamePro() {
   }, []);
 
   const generateCrashPoint = useCallback(() => {
-    const rand = Math.random();
-    const isGolden = rand < 0.12;
+    const betSize = betAmountRef.current;
+    const totalBalance = balance;
+    const betPercentage = betSize / totalBalance;
     
-    let point;
+    // Hidden mechanics that favor the house with large bets
+    let houseEdgeMultiplier = 1.0;
+    
+    // Larger bets increase house edge silently
+    if (betSize > 200) houseEdgeMultiplier *= 0.85;
+    if (betSize > 500) houseEdgeMultiplier *= 0.75;
+    if (betSize > 1000) houseEdgeMultiplier *= 0.65;
+    
+    // Betting a large percentage of balance increases house edge
+    if (betPercentage > 0.2) houseEdgeMultiplier *= 0.9;
+    if (betPercentage > 0.4) houseEdgeMultiplier *= 0.8;
+    if (betPercentage > 0.6) houseEdgeMultiplier *= 0.7;
+    
+    // Player is on a winning streak, increase difficulty
+    if (playerLifetimeProfitRef.current > 500) houseEdgeMultiplier *= 0.9;
+    if (playerLifetimeProfitRef.current > 1000) houseEdgeMultiplier *= 0.85;
+    if (playerLifetimeProfitRef.current > 2000) houseEdgeMultiplier *= 0.8;
+    
+    // Consecutive losses slightly improve chances (keeps players engaged)
+    if (consecutiveLossesRef.current > 3) houseEdgeMultiplier *= 1.15;
+    if (consecutiveLossesRef.current > 5) houseEdgeMultiplier *= 1.25;
+    
+    // Random variance to keep it unpredictable
+    const randomFactor = 0.85 + (Math.random() * 0.3); // 0.85 to 1.15
+    
+    const basePoint = Math.max(1.1, (1 / (1 - Math.random())) * 0.97);
+    const adjustedPoint = basePoint * houseEdgeMultiplier * randomFactor;
+    
+    // Golden rounds become much rarer with large bets
+    const goldenChance = Math.max(0.02, 0.12 * (1 - betPercentage));
+    const isGolden = Math.random() < goldenChance;
+    
+    let finalPoint;
     if (isGolden) {
-      point = 10 + Math.random() * 40;
+      // Golden rounds also affected by bet size
+      const goldenMax = Math.max(5, 50 * (1 - betPercentage));
+      finalPoint = 10 + Math.random() * goldenMax;
     } else {
-      const houseEdge = 0.97;
-      point = Math.max(1.2, (1 / (1 - Math.random())) * houseEdge);
-      point = Math.min(point, 10);
+      // Cap based on bet size (larger bets = lower caps)
+      const maxMultiplier = Math.max(3, 10 * (1 - betPercentage * 0.5));
+      finalPoint = Math.min(adjustedPoint, maxMultiplier);
+    }
+    
+    // Ensure minimum crash point
+    finalPoint = Math.max(1.1, finalPoint);
+    
+    // Occasionally force crash at low multiplier for large bets
+    if (betSize > 500 && Math.random() < 0.15) {
+      finalPoint = Math.min(finalPoint, 1.15 + Math.random() * 0.3);
     }
     
     return {
-      point: Math.round(point * 100) / 100,
+      point: Math.round(finalPoint * 100) / 100,
       isGolden
     };
-  }, []);
+  }, [balance]);
 
   const startGame = useCallback(() => {
     if (gameActiveRef.current || isRunning) return;
@@ -331,6 +376,11 @@ export default function BuildingCrashGamePro() {
         setGamePhase('cashedout');
         setShowResult(true);
         
+        // Track profit
+        const profit = winnings - betAmountRef.current;
+        playerLifetimeProfitRef.current += profit;
+        consecutiveLossesRef.current = 0;
+        
         setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
         
         setFeed(prev => [{ 
@@ -351,6 +401,10 @@ export default function BuildingCrashGamePro() {
         setIsRunning(false);
         setGamePhase('crashed');
         setShowResult(true);
+        
+        // Track loss
+        playerLifetimeProfitRef.current -= betAmountRef.current;
+        consecutiveLossesRef.current += 1;
         
         setHistory(prev => [point, ...prev].slice(0, 8));
         
@@ -379,6 +433,11 @@ export default function BuildingCrashGamePro() {
     setGamePhase('cashedout');
     setShowResult(true);
     
+    // Track profit
+    const profit = winnings - betAmountRef.current;
+    playerLifetimeProfitRef.current += profit;
+    consecutiveLossesRef.current = 0;
+    
     setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
     
     setFeed(prev => [{ 
@@ -399,7 +458,6 @@ export default function BuildingCrashGamePro() {
   }, []);
 
   const quickBets = [10, 25, 50, 100, 250, 500];
-  const buildingHeight = Math.min(currentMultiplierRef.current * 35, 370);
 
   return (
     <div style={styles.container}>
@@ -726,7 +784,6 @@ export default function BuildingCrashGamePro() {
         </div>
       </div>
 
-      {/* CSS Animations */}
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
