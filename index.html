@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crash Game - Live Casino</title>
+    <title>Crash Game – Demo Simulation</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #000; color: white; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #000; color: #fff; }
         .game-container { min-height: 100vh; background: radial-gradient(ellipse at top, #1a1a3e, #0a0a1a); 
             padding: 10px; display: flex; flex-direction: column; align-items: center; padding-top: 120px; }
 
@@ -23,7 +23,7 @@
         .refer-btn { background: #FFD700; color: #000; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: 700; }
         .refer-close { background: none; border: none; color: #aaa; cursor: pointer; font-size: 18px; margin-left: auto; }
 
-        /* Rest of styles (compact) */
+        /* Compact nav */
         .top-nav { position: fixed; top: 0; left: 0; right: 0; background: rgba(10,10,30,0.95);
             backdrop-filter: blur(20px); padding: 6px 12px; display: flex; justify-content: space-between; 
             align-items: center; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -109,9 +109,28 @@
         .feed-item.cashout { background: rgba(22,163,74,0.15); }
         .feed-item.crash { background: rgba(220,38,38,0.15); }
 
-        .mpesa-prompt { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #1e1e1e; padding: 20px; border-radius: 16px; z-index: 3000; width: 90%; max-width: 320px;
-            text-align: center; border: 2px solid #4ade80; }
+        /* M-Pesa styled modal */
+        .mpesa-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 3000;
+        }
+        .mpesa-card {
+            background: #1a1a1a; border: 2px solid #FFD700; border-radius: 20px; padding: 24px;
+            width: 90%; max-width: 360px; text-align: center; color: #fff;
+        }
+        .mpesa-card h3 { color: #FFD700; margin-bottom: 16px; }
+        .mpesa-input {
+            width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; border-radius: 10px;
+            color: #fff; font-size: 16px; text-align: center; margin: 8px 0; outline: none;
+        }
+        .mpesa-btn {
+            width: 100%; padding: 12px; background: #FFD700; color: #000; border: none; border-radius: 10px;
+            font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 12px;
+        }
+        .mpesa-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .mpesa-processing { font-size: 40px; margin: 20px 0; }
+        .mpesa-success { color: #4ade80; font-size: 24px; margin: 10px 0; }
+
         @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
         @keyframes shake { 0%,100%{transform:translateX(0);} 10%,90%{transform:translateX(-4px);} 20%,80%{transform:translateX(4px);} }
     </style>
@@ -160,123 +179,127 @@ function BuildingCrashGamePro() {
     const [fakePlayers, setFakePlayers] = useState([]);
     const [userBetPlaced, setUserBetPlaced] = useState(false);
 
-    // Refer state
+    // Refer
     const [referCode, setReferCode] = useState('CRASH' + Math.floor(Math.random()*10000));
     const [showReferBanner, setShowReferBanner] = useState(true);
 
-    const [showDeposit, setShowDeposit] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
-    const [depositAmount, setDepositAmount] = useState(10000);
-    const [mpesaStep, setMpesaStep] = useState(null);
+    // Deposit flow state
+    const [depositStep, setDepositStep] = useState('hidden'); // hidden | amount | confirm | processing | success
+    const [depositAmount, setDepositAmount] = useState(1000);
+    const [depositPhone, setDepositPhone] = useState('07XXXXXXXX');
     const [mpesaPin, setMpesaPin] = useState('');
-    const [mpesaAmount, setMpesaAmount] = useState(0);
+
+    const [showSettings, setShowSettings] = useState(false);
 
     const intervalRef = useRef(null), countdownRef = useRef(null);
     const roundActiveRef = useRef(false), currentMultiplierRef = useRef(1.0), userBetRef = useRef(null);
 
     const updateBalance = (amt) => {
-        if (accountMode==='demo') setDemoBalance(p=>p+amt);
-        else setRealBalance(p=>p+amt);
+        if (accountMode === 'demo') setDemoBalance(p => p + amt);
+        else setRealBalance(p => p + amt);
     };
 
     const generateCrashPoint = useCallback(() => {
-        const isDemo = accountMode==='demo';
+        const isDemo = accountMode === 'demo';
         let edge = 1.0;
         if (userBetRef.current && !isDemo) {
-            if (userBetRef.current.bet>20000) edge*=0.85;
-            if (userBetRef.current.bet>50000) edge*=0.75;
+            if (userBetRef.current.bet > 20000) edge *= 0.85;
+            if (userBetRef.current.bet > 50000) edge *= 0.75;
         }
-        if (isDemo) edge*=1.25;
-        const rf = 0.85+Math.random()*0.3;
-        const base = Math.max(1.1, (1/(1-Math.random()))*0.97);
-        let adj = base*edge*rf;
-        // Golden round ~2 per hour (1.1% chance per round)
-        const goldenChance = 0.011; 
+        if (isDemo) edge *= 1.25;
+        const rf = 0.85 + Math.random() * 0.3;
+        const base = Math.max(1.1, (1 / (1 - Math.random())) * 0.97);
+        const adj = base * edge * rf;
+        const goldenChance = 0.011; // ~2 per hour
         const isGolden = Math.random() < goldenChance;
-        let final = isGolden ? (15+Math.random()*35) : adj;
-        final = Math.min(final, isGolden ? 50 : 20);
-        final = Math.max(1.1, Math.round(final*100)/100);
-        return { point: final, isGolden };
+        const final = isGolden ? 15 + Math.random() * 35 : adj;
+        return { point: Math.min(Math.max(1.1, Math.round(final*100)/100), 50), isGolden };
     }, [accountMode]);
 
     const startCountdown = useCallback(() => {
         setRoundState('countdown'); setCountdown(10); setMultiplier(1.0); setHasCrashed(false);
         setCashedOut(false); setCashoutMultiplier(null); setShowResultOverlay(false);
-        setUserBetPlaced(false); userBetRef.current=null; currentMultiplierRef.current=1.0; setGoldenRound(false);
-        const players = [];
-        for(let i=0;i<8+Math.floor(Math.random()*10);i++) players.push(generateFakePlayer());
-        setFakePlayers(players);
+        setUserBetPlaced(false); userBetRef.current = null; currentMultiplierRef.current = 1.0; setGoldenRound(false);
+        setFakePlayers(Array.from({length: 8 + Math.floor(Math.random()*10)}, () => generateFakePlayer()));
         countdownRef.current = setInterval(() => {
             setCountdown(prev => {
-                if(prev<=1){ clearInterval(countdownRef.current); startRunning(); return 0; }
-                return prev-1;
+                if (prev <= 1) { clearInterval(countdownRef.current); startRunning(); return 0; }
+                return prev - 1;
             });
-        },1000);
+        }, 1000);
     }, []);
 
     const startRunning = useCallback(() => {
         const { point, isGolden } = generateCrashPoint();
         setCrashPoint(point); setGoldenRound(isGolden); setRoundState('running');
-        roundActiveRef.current = true; currentMultiplierRef.current=1.0;
+        roundActiveRef.current = true; currentMultiplierRef.current = 1.0;
         fakePlayers.forEach(p => {
-            if(Math.random()<0.35) {
-                const cashAt = 1.3+Math.random()*(point-1.2);
-                setTimeout(()=>{ if(roundActiveRef.current) setFakePlayers(prev=>prev.map(fp=>fp.name===p.name?{...fp,cashout:cashAt.toFixed(2),won:true}:fp)); }, cashAt*1000);
+            if (Math.random() < 0.35) {
+                const cashAt = 1.3 + Math.random() * (point - 1.2);
+                setTimeout(() => { if (roundActiveRef.current) setFakePlayers(prev => prev.map(fp => fp.name === p.name ? { ...fp, cashout: cashAt.toFixed(2), won: true } : fp)); }, cashAt * 1000);
             }
         });
         intervalRef.current = setInterval(() => {
-            if(!roundActiveRef.current) return;
-            const newMult = Math.round((currentMultiplierRef.current+0.05)*100)/100;
-            currentMultiplierRef.current = newMult; setMultiplier(newMult);
-            if(userBetRef.current && !cashedOut && newMult>=userBetRef.current.autoCashout) { handleUserCashout(newMult); return; }
-            if(newMult>=point) {
-                clearInterval(intervalRef.current); roundActiveRef.current=false;
+            if (!roundActiveRef.current) return;
+            const mult = Math.round((currentMultiplierRef.current + 0.05)*100)/100;
+            currentMultiplierRef.current = mult; setMultiplier(mult);
+            if (userBetRef.current && !cashedOut && mult >= userBetRef.current.autoCashout) { handleUserCashout(mult); return; }
+            if (mult >= point) {
+                clearInterval(intervalRef.current); roundActiveRef.current = false;
                 setHasCrashed(true); setRoundState('ended'); setShowResultOverlay(true);
-                setHistory(prev=>[point,...prev].slice(0,8));
-                setFeed(prev=>[{id:Date.now(),text:`Crash at ${point.toFixed(2)}x`,type:'crash'},...prev].slice(0,30));
-                setTimeout(startCountdown,4000);
+                setHistory(prev => [point, ...prev].slice(0,8));
+                setFeed(prev => [{ id: Date.now(), text: `Crashed at ${point.toFixed(2)}x`, type: 'crash' }, ...prev].slice(0,30));
+                setTimeout(startCountdown, 4000);
             }
-        },100);
+        }, 100);
     }, [fakePlayers, generateCrashPoint, startCountdown]);
 
     const handleUserCashout = (mult) => {
-        if(cashedOut || !userBetRef.current) return;
-        clearInterval(intervalRef.current); roundActiveRef.current=false;
+        if (cashedOut || !userBetRef.current) return;
+        clearInterval(intervalRef.current); roundActiveRef.current = false;
         const winnings = Math.round(userBetRef.current.bet * mult);
         updateBalance(winnings);
         setCashoutMultiplier(mult); setCashedOut(true); setRoundState('ended'); setShowResultOverlay(true);
-        setHistory(prev=>[mult,...prev].slice(0,8));
-        setFeed(prev=>[{id:Date.now(),text:`You cashed ${mult.toFixed(2)}x +${format(winnings)}`,type:'cashout'},...prev].slice(0,30));
-        setTimeout(startCountdown,4000);
+        setHistory(prev => [mult, ...prev].slice(0,8));
+        setFeed(prev => [{ id: Date.now(), text: `You cashed ${mult.toFixed(2)}x +${format(winnings)}`, type: 'cashout' }, ...prev].slice(0,30));
+        setTimeout(startCountdown, 4000);
     };
 
     const placeBet = () => {
-        if(roundState!=='countdown') return;
-        if(betAmount<=0 || betAmount>currentBalance) { alert('Invalid bet'); return; }
+        if (roundState !== 'countdown') return;
+        if (betAmount <= 0 || betAmount > currentBalance) { alert('Invalid bet'); return; }
         updateBalance(-betAmount);
         userBetRef.current = { bet: betAmount, autoCashout: autoCashout };
         setUserBetPlaced(true);
     };
 
-    useEffect(()=>{ startCountdown(); return ()=>{ clearInterval(intervalRef.current); clearInterval(countdownRef.current); }; }, [accountMode]);
+    useEffect(() => { startCountdown(); return () => { clearInterval(intervalRef.current); clearInterval(countdownRef.current); }; }, [accountMode]);
 
-    const initiateDeposit = () => { if(depositAmount>0){ setMpesaAmount(depositAmount); setMpesaStep('confirm'); } };
-    const confirmMpesa = () => {
-        if(mpesaPin.length<4) return;
-        setMpesaStep('processing');
-        setTimeout(()=>{
-            updateBalance(mpesaAmount);
-            setMpesaStep('success');
-            setTimeout(()=>{ setMpesaStep(null); setShowDeposit(false); },2000);
-        },3000);
+    // Deposit simulation
+    const openDeposit = () => {
+        if (accountMode === 'demo') { alert('Switch to Real account to simulate deposit'); return; }
+        setDepositStep('amount');
+        setDepositAmount(1000);
+        setDepositPhone('07XXXXXXXX');
+        setMpesaPin('');
     };
 
-    const copyReferCode = () => {
-        navigator.clipboard.writeText(referCode);
-        alert('Referral code copied!');
+    const goToConfirm = () => {
+        if (depositAmount <= 0) return;
+        setDepositStep('confirm');
     };
 
-    const buildingHeight = roundState==='running' ? Math.min(multiplier*30, 290) : 0;
+    const processDeposit = () => {
+        if (mpesaPin.length < 4) return;
+        setDepositStep('processing');
+        setTimeout(() => {
+            updateBalance(depositAmount);
+            setDepositStep('success');
+            setTimeout(() => { setDepositStep('hidden'); }, 2000);
+        }, 3000);
+    };
+
+    const buildingHeight = roundState === 'running' ? Math.min(multiplier * 30, 290) : 0;
 
     return (
         <>
@@ -285,80 +308,103 @@ function BuildingCrashGamePro() {
                     <div className="nav-logo">🎮 Crash</div>
                     <div className="nav-balance">
                         <span>💰</span><span className="nav-balance-amount">{format(currentBalance)}</span>
-                        {accountMode==='demo' && <span style={{fontSize:10,color:'#aaa'}}>DEMO</span>}
+                        {accountMode === 'demo' && <span style={{fontSize:10,color:'#aaa'}}>DEMO</span>}
                     </div>
                 </div>
                 <div className="nav-right">
                     <div className="account-toggle">
-                        <button className={accountMode==='demo'?'active':''} onClick={()=>setAccountMode('demo')}>Demo</button>
-                        <button className={accountMode==='real'?'active':''} onClick={()=>setAccountMode('real')}>Real</button>
+                        <button className={accountMode === 'demo' ? 'active' : ''} onClick={() => setAccountMode('demo')}>Demo</button>
+                        <button className={accountMode === 'real' ? 'active' : ''} onClick={() => setAccountMode('real')}>Real</button>
                     </div>
-                    {accountMode==='real' && (
+                    {accountMode === 'real' && (
                         <>
-                            <button className="icon-btn deposit-icon" onClick={()=>setShowDeposit(true)} title="Deposit">💳</button>
-                            <button className="icon-btn withdraw-icon" onClick={()=>{ const amt=prompt('Withdraw amount:'); if(amt&&Number(amt)>0&&Number(amt)<=currentBalance){ updateBalance(-Number(amt)); alert('Withdrawal processed'); } }} title="Withdraw">💸</button>
+                            <button className="icon-btn deposit-icon" onClick={openDeposit} title="Deposit">💳</button>
+                            <button className="icon-btn withdraw-icon" onClick={() => {
+                                const amt = prompt('Enter amount to withdraw:');
+                                if (amt && Number(amt) > 0 && Number(amt) <= currentBalance) { updateBalance(-Number(amt)); alert('Withdrawal simulated'); }
+                            }} title="Withdraw">💸</button>
                         </>
                     )}
-                    {accountMode==='demo' && (
-                        <button className="icon-btn deposit-icon" onClick={()=>setDemoBalance(5000)} title="Reset Demo">🔄</button>
+                    {accountMode === 'demo' && (
+                        <button className="icon-btn deposit-icon" onClick={() => setDemoBalance(5000)} title="Reset Demo">🔄</button>
                     )}
-                    <button className="icon-btn settings-icon" onClick={()=>setShowSettings(true)}>⚙️</button>
+                    <button className="icon-btn settings-icon" onClick={() => setShowSettings(true)}>⚙️</button>
                 </div>
             </div>
 
-            {/* Refer & Earn Banner */}
             {showReferBanner && (
                 <div className="refer-banner">
                     <span>🎁 Refer & Earn <strong>500 KSh</strong></span>
                     <span className="refer-code">Your Code: {referCode}</span>
-                    <button className="refer-btn" onClick={copyReferCode}>Copy</button>
-                    <button className="refer-close" onClick={()=>setShowReferBanner(false)}>✕</button>
+                    <button className="refer-btn" onClick={() => { navigator.clipboard.writeText(referCode); alert('Referral code copied'); }}>Copy</button>
+                    <button className="refer-close" onClick={() => setShowReferBanner(false)}>✕</button>
                 </div>
             )}
 
             <div className="live-users-bar">
-                <span style={{color:'#ef4444',fontWeight:700}}>🔴 {fakePlayers.length+(userBetPlaced?1:0)} online</span>
-                {fakePlayers.slice(0,8).map((p,i)=>(
+                <span style={{color:'#ef4444',fontWeight:700}}>🔴 {fakePlayers.length + (userBetPlaced ? 1 : 0)} online</span>
+                {fakePlayers.slice(0,8).map((p,i) => (
                     <div key={i} className="live-user-badge"><span>{p.name}</span> <span className="live-user-bet">{format(p.bet)}</span></div>
                 ))}
             </div>
 
-            {mpesaStep && (
-                <div className="mpesa-prompt">
-                    {mpesaStep==='confirm' && (
-                        <>
-                            <h3>M-Pesa Deposit</h3>
-                            <div style={{fontSize:24,fontWeight:900}}>{format(mpesaAmount)}</div>
-                            <p>To: <strong>0792091769</strong></p>
-                            <input type="password" className="game-input" placeholder="M-Pesa PIN" value={mpesaPin} onChange={e=>setMpesaPin(e.target.value)} />
-                            <button className="start-btn" style={{width:'100%',marginTop:10}} onClick={confirmMpesa} disabled={mpesaPin.length<4}>Send</button>
-                        </>
-                    )}
-                    {mpesaStep==='processing' && <div>⏳ Processing...</div>}
-                    {mpesaStep==='success' && <div>✅ Deposited {format(mpesaAmount)}</div>}
-                </div>
-            )}
-            {showDeposit && !mpesaStep && (
-                <div className="mpesa-prompt">
-                    <h3>Deposit via M-Pesa</h3>
-                    <input type="number" className="game-input" value={depositAmount} onChange={e=>setDepositAmount(Number(e.target.value))} />
-                    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:5,marginTop:8}}>
-                        {[5000,10000,25000,50000].map(amt=><button key={amt} className="quick-bet-btn" onClick={()=>setDepositAmount(amt)}>{format(amt)}</button>)}
+            {/* Deposit modal simulation */}
+            {depositStep !== 'hidden' && (
+                <div className="mpesa-modal">
+                    <div className="mpesa-card">
+                        {depositStep === 'amount' && (
+                            <>
+                                <h3>Deposit via M-Pesa</h3>
+                                <input type="number" className="mpesa-input" placeholder="Amount" value={depositAmount} onChange={e => setDepositAmount(Number(e.target.value))} />
+                                <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5, marginTop:8}}>
+                                    {[500, 1000, 2500, 5000, 10000].map(a => (
+                                        <button key={a} className="quick-bet-btn" onClick={() => setDepositAmount(a)}>{format(a)}</button>
+                                    ))}
+                                </div>
+                                <button className="mpesa-btn" onClick={goToConfirm}>Continue</button>
+                                <button style={{background:'none', color:'#aaa', marginTop:8}} onClick={() => setDepositStep('hidden')}>Cancel</button>
+                            </>
+                        )}
+                        {depositStep === 'confirm' && (
+                            <>
+                                <h3>Confirm Payment</h3>
+                                <div style={{fontSize:28, fontWeight:900}}>{format(depositAmount)}</div>
+                                <div style={{color:'#aaa', marginBottom:10}}>To: <strong>0792091769</strong></div>
+                                <input type="password" className="mpesa-input" placeholder="M-Pesa PIN" value={mpesaPin} onChange={e => setMpesaPin(e.target.value)} maxLength={6} />
+                                <button className="mpesa-btn" onClick={processDeposit} disabled={mpesaPin.length < 4}>Send</button>
+                                <button style={{background:'none', color:'#aaa', marginTop:8}} onClick={() => setDepositStep('amount')}>Back</button>
+                            </>
+                        )}
+                        {depositStep === 'processing' && (
+                            <div>
+                                <div className="mpesa-processing">⏳</div>
+                                <p>Processing payment...</p>
+                                <p style={{color:'#aaa', fontSize:14}}>Check your phone for M-Pesa prompt</p>
+                            </div>
+                        )}
+                        {depositStep === 'success' && (
+                            <div>
+                                <div style={{fontSize:40}}>✅</div>
+                                <div className="mpesa-success">Deposit Successful!</div>
+                                <p>+{format(depositAmount)}</p>
+                            </div>
+                        )}
                     </div>
-                    <button className="start-btn" style={{width:'100%',marginTop:10}} onClick={initiateDeposit}>Deposit {format(depositAmount)}</button>
-                    <button style={{background:'none',color:'#aaa',marginTop:6}} onClick={()=>setShowDeposit(false)}>Cancel</button>
                 </div>
             )}
+
             {showSettings && (
-                <div className="mpesa-prompt">
-                    <h3>Settings</h3>
-                    <div style={{margin:'10px 0'}}>
-                        <label>Currency</label>
-                        <select className="game-input" value={selectedCurrency} onChange={e=>setSelectedCurrency(e.target.value)}>
-                            {Object.entries(currencies).map(([code,cr])=><option key={code} value={code}>{cr.symbol} {cr.name}</option>)}
-                        </select>
+                <div className="mpesa-modal" onClick={() => setShowSettings(false)}>
+                    <div className="mpesa-card">
+                        <h3>Settings</h3>
+                        <div style={{margin:'15px 0'}}>
+                            <label>Currency</label>
+                            <select className="mpesa-input" value={selectedCurrency} onChange={e => setSelectedCurrency(e.target.value)}>
+                                {Object.entries(currencies).map(([code, cr]) => <option key={code} value={code}>{cr.symbol} - {cr.name}</option>)}
+                            </select>
+                        </div>
+                        <button className="mpesa-btn" onClick={() => setShowSettings(false)}>Close</button>
                     </div>
-                    <button onClick={()=>setShowSettings(false)} className="quick-bet-btn" style={{width:'100%'}}>Close</button>
                 </div>
             )}
 
@@ -367,34 +413,50 @@ function BuildingCrashGamePro() {
                     <div className="header">
                         <div className="title">Building Crash</div>
                         <div className="status-badge">
-                            <div className={`status-dot ${roundState==='countdown'?'countdown':roundState==='running'?'running':'ended'}`}/>
-                            <span>{roundState==='countdown'?`${countdown}s`:roundState==='running'?'LIVE':'ENDED'}</span>
+                            <div className={`status-dot ${roundState === 'countdown' ? 'countdown' : roundState === 'running' ? 'running' : 'ended'}`} />
+                            <span>{roundState === 'countdown' ? `${countdown}s` : roundState === 'running' ? 'LIVE' : 'ENDED'}</span>
                         </div>
                     </div>
                     <div className="players-panel">
-                        <div style={{fontWeight:700,marginBottom:4}}>👥 Players</div>
-                        {fakePlayers.map((p,i)=><div key={i} className="player-row"><span>{p.name}</span><span className="live-user-bet">{format(p.bet)}</span>{p.cashout&&<span style={{color:p.won?'#4ade80':'#ef4444'}}>{p.cashout}x</span>}</div>)}
-                        {userBetPlaced&&<div className="player-row"><span style={{color:'#fbbf24'}}>You</span><span className="live-user-bet">{format(betAmount)}</span></div>}
+                        <div style={{fontWeight:700, marginBottom:4}}>👥 Players</div>
+                        {fakePlayers.map((p,i) => (
+                            <div key={i} className="player-row">
+                                <span>{p.name}</span><span className="live-user-bet">{format(p.bet)}</span>{p.cashout && <span style={{color: p.won ? '#4ade80' : '#ef4444'}}>{p.cashout}x</span>}
+                            </div>
+                        ))}
+                        {userBetPlaced && (
+                            <div className="player-row"><span style={{color:'#fbbf24'}}>You</span><span className="live-user-bet">{format(betAmount)}</span></div>
+                        )}
                     </div>
                     <div className="game-area">
-                        <div className="sky">{[...Array(20)].map((_,i)=><div key={i} className="star" style={{left:`${Math.random()*100}%`,top:`${Math.random()*70}%`,width:2,height:2}}/>)}</div>
-                        <div className="ground"/>
+                        <div className="sky">{Array(20).fill(0).map((_,i) => <div key={i} className="star" style={{left:`${Math.random()*100}%`,top:`${Math.random()*70}%`,width:2,height:2}} />)}</div>
+                        <div className="ground" />
                         <div className="building-container">
-                            <div className={`building ${hasCrashed?'crashed':goldenRound?'golden':'normal'}`} style={{height:`${buildingHeight}px`,transform:`scaleX(${Math.max(0.6,Math.min(multiplier/10,1))})`}}/>
+                            <div className={`building ${hasCrashed ? 'crashed' : goldenRound ? 'golden' : 'normal'}`} style={{height:`${buildingHeight}px`, transform:`scaleX(${Math.max(0.6, Math.min(multiplier/10, 1))})`}} />
                         </div>
-                        {goldenRound && roundState==='running' && !hasCrashed && <div className="golden-banner">⭐ GOLDEN</div>}
-                        {roundState==='running' && !hasCrashed && <div className="multiplier-display">{multiplier.toFixed(2)}x</div>}
-                        {hasCrashed && showResultOverlay && <div className="crash-overlay" style={{position:'absolute',inset:0,background:'rgba(185,28,28,0.7)',display:'flex',alignItems:'center',justifyContent:'center'}}><div>💥 CRASHED at {crashPoint?.toFixed(2)}x</div></div>}
-                        {cashedOut && showResultOverlay && <div className="cashout-overlay" style={{position:'absolute',inset:0,background:'rgba(22,163,74,0.7)',display:'flex',alignItems:'center',justifyContent:'center'}}><div>🎉 +{format(betAmount*cashoutMultiplier)}</div></div>}
+                        {goldenRound && roundState === 'running' && !hasCrashed && <div className="golden-banner">⭐ GOLDEN</div>}
+                        {roundState === 'running' && !hasCrashed && <div className="multiplier-display">{multiplier.toFixed(2)}x</div>}
+                        {hasCrashed && showResultOverlay && (
+                            <div style={{position:'absolute',inset:0,background:'rgba(185,28,28,0.7)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column'}}>
+                                <div style={{fontSize:40}}>💥 CRASHED</div>
+                                <div>at {crashPoint?.toFixed(2)}x</div>
+                            </div>
+                        )}
+                        {cashedOut && showResultOverlay && (
+                            <div style={{position:'absolute',inset:0,background:'rgba(22,163,74,0.7)',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column'}}>
+                                <div style={{fontSize:40}}>🎉 +{format(betAmount * cashoutMultiplier)}</div>
+                                <div>at {cashoutMultiplier?.toFixed(2)}x</div>
+                            </div>
+                        )}
                     </div>
 
                     <div className="buttons-container">
-                        {roundState==='countdown' && !userBetPlaced ? (
-                            <button className="start-btn" onClick={placeBet} disabled={betAmount<=0||betAmount>currentBalance}>Bet {format(betAmount)}</button>
-                        ) : roundState==='countdown' && userBetPlaced ? (
+                        {roundState === 'countdown' && !userBetPlaced ? (
+                            <button className="start-btn" onClick={placeBet} disabled={betAmount <= 0 || betAmount > currentBalance}>Bet {format(betAmount)}</button>
+                        ) : roundState === 'countdown' && userBetPlaced ? (
                             <button className="start-btn" disabled>Bet Placed</button>
-                        ) : roundState==='running' && userBetPlaced && !cashedOut ? (
-                            <button className="cashout-btn" onClick={()=>handleUserCashout(currentMultiplierRef.current)}>Cash Out</button>
+                        ) : roundState === 'running' && userBetPlaced && !cashedOut ? (
+                            <button className="cashout-btn" onClick={() => handleUserCashout(currentMultiplierRef.current)}>Cash Out</button>
                         ) : (
                             <button className="start-btn" disabled>Waiting...</button>
                         )}
@@ -402,26 +464,29 @@ function BuildingCrashGamePro() {
                     </div>
 
                     <div className="quick-bets">
-                        {[500,1000,2500,5000,10000,25000].map(amt=><button key={amt} className={`quick-bet-btn ${betAmount===amt?'active':''}`} onClick={()=>setBetAmount(amt)} disabled={amt>currentBalance}>{format(amt)}</button>)}
+                        {[500, 1000, 2500, 5000, 10000, 25000].map(amt => (
+                            <button key={amt} className={`quick-bet-btn ${betAmount === amt ? 'active' : ''}`} onClick={() => setBetAmount(amt)} disabled={amt > currentBalance}>{format(amt)}</button>
+                        ))}
                     </div>
                     <div className="input-group">
-                        <div><label className="input-label">Auto Cashout</label><input type="number" step="0.1" className="game-input" value={autoCashout} onChange={e=>setAutoCashout(Number(e.target.value))} /></div>
+                        <div><label className="input-label">Auto Cashout</label><input type="number" step="0.1" className="game-input" value={autoCashout} onChange={e => setAutoCashout(Number(e.target.value))} /></div>
                     </div>
 
                     <div className="history-section">
                         <div className="section-title"><span style={{color:'#60a5fa'}}>●</span> Recent</div>
                         <div className="history-list">
-                            {history.map((h,i)=><span key={i} className={`history-item ${h>=10?'purple':h>=5?'orange':h>=2?'yellow':'gray'}`}>{h.toFixed(2)}x</span>)}
+                            {history.map((h,i) => <span key={i} className={`history-item ${h>=10?'purple':h>=5?'orange':h>=2?'yellow':'gray'}`}>{h.toFixed(2)}x</span>)}
                         </div>
                     </div>
                     <div className="feed-section">
                         <div className="section-title"><span style={{color:'#4ade80'}}>●</span> Live Feed</div>
                         <div className="feed-list">
-                            {feed.map(f=><div key={f.id} className={`feed-item ${f.type}`}><span>{f.type==='cashout'?'💰':'💥'}</span> {f.text}</div>)}
+                            {feed.map(f => <div key={f.id} className={`feed-item ${f.type}`}><span>{f.type==='cashout'?'💰':'💥'}</span> {f.text}</div>)}
                         </div>
                     </div>
                 </div>
             </div>
+            <div style={{position:'fixed',bottom:10,right:10,color:'#666',fontSize:10}}>Demo simulation – No real money</div>
         </>
     );
 }
