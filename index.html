@@ -1,102 +1,85 @@
-// GitHub-ready file: src/App.jsx // Copy and paste this entire file into your GitHub project // Recommended setup: Vite + React + Tailwind CSS
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cinematic 4K Enhancer</title>  <script src="https://cdn.tailwindcss.com"></script>  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+    }
+  </style></head>
+<body>  <div style="min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;">
+    <div style="width:100%;max-width:700px;background:#111;border:1px solid #333;border-radius:24px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,0.4);"><div style="text-align:center;margin-bottom:30px;">
+    <h1 style="font-size:42px;margin-bottom:10px;">Cinematic 4K Enhancer</h1>
+    <p style="color:#bbb;line-height:1.6;">
+      Upgrade blurry photos and low-quality videos into sharp,
+      vibrant, cinematic 4K visuals with premium color,
+      stabilization, and professional-looking results.
+    </p>
+  </div>
 
-import React, { useState } from "react"; import { motion } from "framer-motion"; import { Upload, Image as ImageIcon, Video, Sparkles } from "lucide-react";
+  <div style="border:2px dashed #444;border-radius:20px;padding:30px;text-align:center;margin-bottom:20px;">
+    <p style="margin-bottom:15px;">Upload your photo or video for AI cinematic enhancement</p>
+    <input type="file" id="fileInput" accept="image/*,video/*" />
+  </div>
 
-export default function App() { const [fileName, setFileName] = useState(""); const [processing, setProcessing] = useState(false); const [done, setDone] = useState(false);
+  <div id="fileNameBox" style="display:none;background:#1a1a1a;padding:15px;border-radius:16px;margin-bottom:20px;">
+    <span id="fileName"></span>
+  </div>
 
-const handleUpload = (e) => { const file = e.target.files?.[0]; if (file) { setFileName(file.name); setDone(false); } };
+  <button
+    onclick="enhanceMedia()"
+    style="width:100%;padding:16px;border:none;border-radius:16px;background:white;color:black;font-weight:bold;font-size:16px;cursor:pointer;"
+  >
+    AI Cinematic Upgrade
+  </button>
 
-const handleEnhance = () => { if (!fileName) return;
+  <div id="processing" style="display:none;text-align:center;margin-top:20px;color:#ccc;">
+    AI is enhancing frames, sharpening details, improving colors,
+    stabilizing motion, reducing blur, and creating cinematic 4K quality...
+  </div>
 
-setProcessing(true);
-setDone(false);
+  <div id="done" style="display:none;background:#1a1a1a;padding:20px;border-radius:16px;margin-top:20px;text-align:center;">
+    <h2>Enhancement Complete</h2>
+    <p style="color:#bbb;">
+      Your media now has stronger colors, clearer details,
+      brighter lighting, deeper contrast, smoother video motion,
+      and a premium cinematic 4K finish.
+    </p>
+  </div>
 
-setTimeout(() => {
-  setProcessing(false);
-  setDone(true);
-}, 3500);
-
-};
-
-const isVideo = /.(mp4|mov|avi|mkv|webm)$/i.test(fileName);
-
-return ( <div className="min-h-screen bg-black text-white flex items-center justify-center p-6"> <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl" > <div className="bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl p-8 space-y-6"> <div className="text-center space-y-3"> <h1 className="text-4xl font-bold tracking-tight"> Cinematic 4K Enhancer </h1>
-
-<p className="text-zinc-400">
-          Upgrade blurry photos and low-quality videos into sharp,
-          vibrant, cinematic 4K visuals with premium color, clarity,
-          stabilization, and professional-looking results.
-        </p>
-      </div>
-
-      <label className="border-2 border-dashed border-zinc-700 rounded-3xl p-10 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-zinc-500 transition">
-        <Upload className="w-10 h-10" />
-
-        <p className="text-sm text-zinc-300 text-center">
-          Upload your photo or video for AI cinematic enhancement
-        </p>
-
-        <input
-          type="file"
-          accept="image/*,video/*"
-          className="hidden"
-          onChange={handleUpload}
-        />
-      </label>
-
-      {fileName && (
-        <div className="bg-zinc-900 rounded-2xl p-4 flex items-center gap-3">
-          {isVideo ? (
-            <Video className="w-5 h-5" />
-          ) : (
-            <Image as ImageIcon className="w-5 h-5" />
-          )}
-
-          <span className="text-sm break-all">{fileName}</span>
-        </div>
-      )}
-
-      <button
-        onClick={handleEnhance}
-        disabled={!fileName || processing}
-        className="w-full rounded-2xl py-4 font-semibold bg-white text-black disabled:opacity-50"
-      >
-        {processing ? "Enhancing..." : "AI Cinematic Upgrade"}
-      </button>
-
-      {processing && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center text-zinc-300"
-        >
-          AI is enhancing frames, sharpening details, improving colors,
-          stabilizing motion, reducing blur, and creating cinematic 4K
-          quality...
-        </motion.div>
-      )}
-
-      {done && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-zinc-900 rounded-2xl p-5 text-center space-y-3"
-        >
-          <Sparkles className="mx-auto w-8 h-8" />
-
-          <h2 className="text-xl font-semibold">
-            Enhancement Complete
-          </h2>
-
-          <p className="text-sm text-zinc-400">
-            Your media now has stronger colors, clearer details,
-            brighter lighting, deeper contrast, smoother video motion,
-            and a premium cinematic 4K finish.
-          </p>
-        </motion.div>
-      )}
-    </div>
-  </motion.div>
 </div>
 
-); }
+  </div>  <script>
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const fileNameBox = document.getElementById("fileNameBox");
+    const processing = document.getElementById("processing");
+    const done = document.getElementById("done");
+
+    fileInput.addEventListener("change", function () {
+      if (this.files.length > 0) {
+        fileName.textContent = this.files[0].name;
+        fileNameBox.style.display = "block";
+        done.style.display = "none";
+      }
+    });
+
+    function enhanceMedia() {
+      if (!fileInput.files.length) {
+        alert("Please upload a photo or video first.");
+        return;
+      }
+
+      processing.style.display = "block";
+      done.style.display = "none";
+
+      setTimeout(() => {
+        processing.style.display = "none";
+        done.style.display = "block";
+      }, 3500);
+    }
+  </script></body>
+</html>
