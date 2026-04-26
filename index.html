@@ -1,143 +1,584 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
-REAL AI Cinematic 4K Enhancer (Backend Starter)
+export default function BuildingCrashGamePro() {
+  // Game State
+  const [balance, setBalance] = useState(1000);
+  const [betAmount, setBetAmount] = useState(100);
+  const [autoCashout, setAutoCashout] = useState(2.0);
+  const [multiplier, setMultiplier] = useState(1.0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [hasCrashed, setHasCrashed] = useState(false);
+  const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
+  const [crashPoint, setCrashPoint] = useState(null);
+  const [goldenRound, setGoldenRound] = useState(false);
+  const [gamePhase, setGamePhase] = useState('idle'); // idle, running, cashedout, crashed
+  const [showResult, setShowResult] = useState(false);
+  
+  // History & Feed
+  const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
+  const [feed, setFeed] = useState([
+    { id: 1, text: "John cashed out at 2.45x", type: "cashout", time: "2m ago" },
+    { id: 2, text: "Mike crashed at 1.21x", type: "crash", time: "3m ago" },
+    { id: 3, text: "Sarah cashed out at 4.10x", type: "cashout", time: "4m ago" },
+  ]);
+  
+  // Refs
+  const intervalRef = useRef(null);
+  const currentMultiplierRef = useRef(1.0);
+  const gameActiveRef = useRef(false);
+  const betAmountRef = useRef(100);
+  const autoCashoutRef = useRef(2.0);
+  const cashoutTriggeredRef = useRef(false);
 
-File: app.py
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
-This is the REAL backend starter for true enhancement
+  // Keep refs in sync with state
+  useEffect(() => {
+    betAmountRef.current = betAmount;
+  }, [betAmount]);
 
-Uses Python + Flask + OpenCV + Real-ESRGAN style workflow
+  useEffect(() => {
+    autoCashoutRef.current = autoCashout;
+  }, [autoCashout]);
 
-from flask import Flask, request, jsonify, send_from_directory from werkzeug.utils import secure_filename import os import cv2
+  // Reset current multiplier ref when game starts/stops
+  useEffect(() => {
+    if (!isRunning) {
+      currentMultiplierRef.current = 1.0;
+    }
+  }, [isRunning]);
 
-app = Flask(name)
+  // Helper functions
+  const safeMultiply = useCallback((a, b) => {
+    return Math.round((a * b) * 100) / 100;
+  }, []);
 
-UPLOAD_FOLDER = "uploads" OUTPUT_FOLDER = "enhanced"
+  const addToFeed = useCallback((text, type = 'info') => {
+    const newFeed = {
+      id: Date.now(),
+      text,
+      type,
+      time: 'Just now'
+    };
+    setFeed(prev => [newFeed, ...prev].slice(0, 20));
+  }, []);
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True) os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+  const generateCrashPoint = useCallback(() => {
+    // More realistic crash point distribution
+    const rand = Math.random();
+    const isGolden = rand < 0.12; // 12% chance of golden round
+    
+    let point;
+    if (isGolden) {
+      // Golden rounds: 10x to 50x
+      point = 10 + Math.random() * 40;
+    } else {
+      // Normal distribution favoring lower multipliers
+      // Using exponential distribution for realistic crash game feel
+      const houseEdge = 0.97; // 3% house edge
+      point = Math.max(1.2, (1 / (1 - Math.random())) * houseEdge);
+      // Cap at 10x for non-golden rounds
+      point = Math.min(point, 10);
+    }
+    
+    return {
+      point: Math.round(point * 100) / 100,
+      isGolden
+    };
+  }, []);
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER
+  const startGame = useCallback(() => {
+    // Validation
+    if (gameActiveRef.current || isRunning) return;
+    if (betAmount <= 0 || betAmount > balance) {
+      alert(betAmount <= 0 ? "Please enter a bet amount" : "Insufficient balance!");
+      return;
+    }
 
-ALLOWED_EXTENSIONS = { "png", "jpg", "jpeg", "webp", "mp4", "mov", "avi", "mkv" }
+    const { point, isGolden } = generateCrashPoint();
+    
+    // Reset all game state
+    currentMultiplierRef.current = 1.0;
+    cashoutTriggeredRef.current = false;
+    gameActiveRef.current = true;
+    
+    setCrashPoint(point);
+    setGoldenRound(isGolden);
+    setBalance(prev => prev - betAmount);
+    setMultiplier(1.0);
+    setCashoutMultiplier(null);
+    setHasCrashed(false);
+    setIsRunning(true);
+    setGamePhase('running');
+    setShowResult(false);
 
-def allowed_file(filename): return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
------------------------------
+    // Start game loop
+    intervalRef.current = setInterval(() => {
+      if (!gameActiveRef.current) {
+        clearInterval(intervalRef.current);
+        return;
+      }
 
-IMAGE ENHANCEMENT (Starter)
+      const newMultiplier = Math.round((currentMultiplierRef.current + 0.05) * 100) / 100;
+      currentMultiplierRef.current = newMultiplier;
+      
+      // Update multiplier state (batching for performance)
+      setMultiplier(newMultiplier);
 
------------------------------
+      // Check auto-cashout
+      if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
+        cashoutTriggeredRef.current = true;
+        const winnings = safeMultiply(betAmountRef.current, newMultiplier);
+        
+        // Stop the game
+        clearInterval(intervalRef.current);
+        gameActiveRef.current = false;
+        
+        // Update all states
+        setBalance(prev => prev + winnings);
+        setCashoutMultiplier(newMultiplier);
+        setIsRunning(false);
+        setGamePhase('cashedout');
+        setShowResult(true);
+        
+        // Update history
+        setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
+        
+        // Add to feed
+        addToFeed(`You auto-cashed out at ${newMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
+        
+        return;
+      }
 
-def enhance_image(input_path, output_path): image = cv2.imread(input_path)
+      // Check crash
+      if (newMultiplier >= point) {
+        clearInterval(intervalRef.current);
+        gameActiveRef.current = false;
+        
+        // Set crash state
+        setHasCrashed(true);
+        setIsRunning(false);
+        setGamePhase('crashed');
+        setShowResult(true);
+        
+        // Update history with crash point
+        setHistory(prev => [point, ...prev].slice(0, 8));
+        
+        addToFeed(`Game crashed at ${point.toFixed(2)}x`, 'crash');
+      }
+    }, 100); // Slightly faster updates for smoother animation
+  }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply, addToFeed]);
 
-if image is None:
-    return False
+  const handleCashout = useCallback(() => {
+    if (!gameActiveRef.current || !isRunning || cashoutTriggeredRef.current) return;
+    
+    cashoutTriggeredRef.current = true;
+    const currentMultiplier = currentMultiplierRef.current;
+    const winnings = safeMultiply(betAmountRef.current, currentMultiplier);
+    
+    // Stop the game immediately
+    clearInterval(intervalRef.current);
+    gameActiveRef.current = false;
+    
+    // Update states
+    setBalance(prev => prev + winnings);
+    setCashoutMultiplier(currentMultiplier);
+    setIsRunning(false);
+    setGamePhase('cashedout');
+    setShowResult(true);
+    
+    // Update history
+    setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
+    
+    addToFeed(`You cashed out at ${currentMultiplier.toFixed(2)}x for $${winnings}`, 'cashout');
+  }, [isRunning, safeMultiply, addToFeed]);
 
-# Simple starter enhancement
-# Replace later with Real-ESRGAN model
+  const resetGame = useCallback(() => {
+    setShowResult(false);
+    setGamePhase('idle');
+    setMultiplier(1.0);
+    setHasCrashed(false);
+    setCashoutMultiplier(null);
+    setCrashPoint(null);
+    setGoldenRound(false);
+  }, []);
 
-sharpen_kernel = cv2.GaussianBlur(image, (0, 0), 3)
-enhanced = cv2.addWeighted(image, 1.5, sharpen_kernel, -0.5, 0)
+  // Calculate dynamic colors based on multiplier
+  const getMultiplierColor = () => {
+    if (hasCrashed) return 'text-red-500';
+    if (multiplier >= 10) return 'text-purple-400 animate-pulse';
+    if (multiplier >= 5) return 'text-orange-400';
+    if (multiplier >= 2) return 'text-yellow-400';
+    if (multiplier >= 1.5) return 'text-green-400';
+    return 'text-blue-400';
+  };
 
-enhanced = cv2.convertScaleAbs(enhanced, alpha=1.15, beta=10)
+  const getBuildingColor = () => {
+    if (hasCrashed) return 'bg-gradient-to-t from-red-700 to-red-400';
+    if (goldenRound) return 'bg-gradient-to-t from-yellow-600 to-yellow-300 shadow-lg shadow-yellow-500/30';
+    if (multiplier >= 5) return 'bg-gradient-to-t from-purple-600 to-purple-400';
+    if (multiplier >= 2) return 'bg-gradient-to-t from-blue-600 to-blue-400';
+    return 'bg-gradient-to-t from-cyan-600 to-cyan-400';
+  };
 
-cv2.imwrite(output_path, enhanced)
-return True
+  // Building animation
+  const buildingHeight = Math.min(multiplier * 35, 430);
+  const buildingScale = Math.min(multiplier / 10, 1);
 
------------------------------
+  // Quick bet amounts
+  const quickBets = [10, 25, 50, 100, 250, 500];
 
-VIDEO ENHANCEMENT (Starter)
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white p-4 flex justify-center items-center">
+      <div className="w-full max-w-lg bg-gray-900/80 backdrop-blur-sm rounded-3xl shadow-2xl p-6 space-y-4 border border-gray-800">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            🏗️ Building Crash
+          </h1>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-400 animate-pulse' : 'bg-gray-500'}`} />
+            <span className="text-sm text-gray-400">
+              {isRunning ? 'Live' : 'Waiting'}
+            </span>
+          </div>
+        </div>
 
------------------------------
+        {/* Balance Display */}
+        <div className="bg-gray-800/50 rounded-2xl p-4 backdrop-blur-sm border border-gray-700">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400 text-sm">Balance</span>
+            <div className="text-2xl font-bold text-green-400">
+              ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+          {gamePhase === 'cashedout' && showResult && (
+            <div className="mt-2 text-center text-green-400 font-bold">
+              +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+            </div>
+          )}
+          {gamePhase === 'crashed' && showResult && (
+            <div className="mt-2 text-center text-red-400 font-bold">
+              -${betAmount.toFixed(2)}
+            </div>
+          )}
+        </div>
 
-def enhance_video(input_path, output_path): cap = cv2.VideoCapture(input_path)
+        {/* Bet Controls */}
+        <div className="space-y-3">
+          {/* Quick Bet Buttons */}
+          <div className="grid grid-cols-6 gap-1.5">
+            {quickBets.map(amount => (
+              <button
+                key={amount}
+                onClick={() => !isRunning && setBetAmount(amount)}
+                disabled={isRunning}
+                className={`py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  betAmount === amount 
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                ${amount}
+              </button>
+            ))}
+          </div>
 
-if not cap.isOpened():
-    return False
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Bet Amount</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  value={betAmount}
+                  onChange={(e) => {
+                    const value = Math.max(0, Number(e.target.value));
+                    setBetAmount(value);
+                  }}
+                  disabled={isRunning}
+                  className="w-full pl-7 pr-3 py-2.5 bg-gray-800 rounded-xl border border-gray-700 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
 
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = cap.get(cv2.CAP_PROP_FPS)
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Auto Cashout</label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1.1"
+                  value={autoCashout}
+                  onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
+                  className="w-full px-3 py-2.5 bg-gray-800 rounded-xl border border-gray-700 focus:border-blue-500 focus:outline-none"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">x</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        {/* Game Area */}
+        <div className="relative bg-gray-800/50 rounded-2xl h-[400px] overflow-hidden border border-gray-700">
+          {/* Sky background with stars */}
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+            {/* Stars */}
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 60}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  opacity: Math.random() * 0.5 + 0.3
+                }}
+              />
+            ))}
+          </div>
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+          {/* Ground */}
+          <div className="absolute bottom-0 w-full h-16 bg-gradient-to-t from-gray-700 to-gray-600">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500" />
+          </div>
 
-    blur = cv2.GaussianBlur(frame, (0, 0), 2)
-    enhanced = cv2.addWeighted(frame, 1.4, blur, -0.4, 5)
+          {/* Building Container */}
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-end justify-center">
+            {/* Building */}
+            <div
+              className={`w-28 rounded-t-lg transition-all duration-300 ease-out relative ${
+                getBuildingColor()
+              } ${hasCrashed ? 'animate-shake' : ''}`}
+              style={{
+                height: `${buildingHeight}px`,
+                maxHeight: '370px',
+                transform: `scaleX(${buildingScale})`,
+                transformOrigin: 'bottom center'
+              }}
+            >
+              {/* Building windows */}
+              {!hasCrashed && buildingHeight > 40 && (
+                <div className="absolute inset-0 overflow-hidden">
+                  {Array.from({ length: Math.floor(buildingHeight / 35) }).map((_, floor) => (
+                    <div key={floor} className="flex justify-around py-1.5">
+                      {[0, 1].map((window) => (
+                        <div
+                          key={window}
+                          className={`w-5 h-4 rounded-sm transition-colors ${
+                            goldenRound ? 'bg-yellow-300/80' : 'bg-blue-200/80'
+                          } ${multiplier > 2 ? 'animate-pulse' : ''}`}
+                          style={{
+                            animationDelay: `${floor * 0.1}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-    out.write(enhanced)
+              {/* Building top decoration */}
+              {!hasCrashed && buildingHeight > 20 && (
+                <div className={`absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full ${
+                  goldenRound ? 'bg-yellow-400' : 'bg-blue-400'
+                }`} />
+              )}
+            </div>
+          </div>
 
-cap.release()
-out.release()
-return True
+          {/* Golden Round Banner */}
+          {goldenRound && isRunning && !hasCrashed && (
+            <div className="absolute top-4 left-0 right-0 flex justify-center">
+              <div className="bg-gradient-to-r from-yellow-600 to-yellow-400 text-black px-4 py-1 rounded-full font-bold text-sm animate-bounce">
+                ⭐ GOLDEN ROUND ⭐
+              </div>
+            </div>
+          )}
 
------------------------------
+          {/* Multiplier Display */}
+          {isRunning && (
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center ${
+              hasCrashed ? 'hidden' : ''
+            }`}>
+              <div className={`text-6xl font-black ${getMultiplierColor()} transition-colors`}>
+                {multiplier.toFixed(2)}x
+              </div>
+            </div>
+          )}
 
-API ROUTE
+          {/* Crash Overlay */}
+          {hasCrashed && showResult && (
+            <div className="absolute inset-0 bg-red-900/60 backdrop-blur-sm flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">💥</div>
+                <div className="text-4xl font-black text-red-400 animate-bounce">
+                  CRASHED!
+                </div>
+                <div className="text-xl text-red-300 mt-2">
+                  at {crashPoint?.toFixed(2)}x
+                </div>
+              </div>
+            </div>
+          )}
 
------------------------------
+          {/* Cashout Overlay */}
+          {gamePhase === 'cashedout' && showResult && !hasCrashed && (
+            <div className="absolute inset-0 bg-green-900/40 backdrop-blur-sm flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🎉</div>
+                <div className="text-4xl font-black text-green-400">
+                  +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+                </div>
+                <div className="text-xl text-green-300 mt-2">
+                  at {cashoutMultiplier?.toFixed(2)}x
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-@app.route("/upload", methods=["POST"]) def upload_file(): if "file" not in request.files: return jsonify({"error": "No file uploaded"}), 400
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={showResult ? resetGame : startGame}
+            disabled={isRunning || (betAmount > balance || betAmount <= 0)}
+            className={`py-3 rounded-2xl font-bold text-lg transition-all transform active:scale-95 ${
+              showResult
+                ? 'bg-gray-600 hover:bg-gray-500'
+                : 'bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
+          >
+            {showResult ? '🔄 Play Again' : isRunning ? '🏃 Running...' : '🎮 Place Bet'}
+          </button>
 
-file = request.files["file"]
+          <button
+            onClick={handleCashout}
+            disabled={!isRunning || cashoutTriggeredRef.current}
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black py-3 rounded-2xl font-bold text-lg transition-all transform active:scale-95 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            💰 Cash Out
+          </button>
+        </div>
 
-if file.filename == "":
-    return jsonify({"error": "Empty filename"}), 400
+        {/* Game Stats */}
+        {crashPoint && (gamePhase === 'crashed' || gamePhase === 'cashedout') && (
+          <div className="bg-gray-800/50 rounded-xl p-3 text-center text-sm border border-gray-700">
+            <span className="text-gray-400">
+              {goldenRound ? '⭐ Golden Round - ' : ''}
+              Crashed at: <span className="text-red-400 font-bold">{crashPoint.toFixed(2)}x</span>
+            </span>
+          </div>
+        )}
 
-if not allowed_file(file.filename):
-    return jsonify({"error": "Unsupported file type"}), 400
+        {/* History */}
+        <div>
+          <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
+            <span className="w-2 h-2 bg-blue-400 rounded-full" />
+            Recent Rounds
+          </h2>
+          <div className="flex flex-wrap gap-1.5">
+            {history.map((item, i) => (
+              <span
+                key={i}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
+                  item >= 10 ? 'bg-purple-900/50 text-purple-300 border border-purple-800' :
+                  item >= 5 ? 'bg-orange-900/50 text-orange-300 border border-orange-800' :
+                  item >= 2 ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-800' :
+                  'bg-gray-700/50 text-gray-300 border border-gray-600'
+                }`}
+              >
+                {item.toFixed(2)}x
+              </span>
+            ))}
+          </div>
+        </div>
 
-filename = secure_filename(file.filename)
-input_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-output_path = os.path.join(app.config["OUTPUT_FOLDER"], f"enhanced_{filename}")
+        {/* Live Feed */}
+        <div>
+          <h2 className="font-bold mb-2 text-sm flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            Live Feed
+          </h2>
+          <div className="space-y-1.5 max-h-32 overflow-y-auto custom-scrollbar">
+            {feed.map((item) => (
+              <div
+                key={item.id}
+                className={`p-2 rounded-lg text-xs flex items-center gap-2 animate-fadeIn ${
+                  item.type === 'cashout' ? 'bg-green-900/20 border border-green-800/50' :
+                  item.type === 'crash' ? 'bg-red-900/20 border border-red-800/50' :
+                  'bg-gray-800/50 border border-gray-700/50'
+                }`}
+              >
+                <span className={`text-lg ${
+                  item.type === 'cashout' ? '' :
+                  item.type === 'crash' ? '' : ''
+                }`}>
+                  {item.type === 'cashout' ? '💚' : item.type === 'crash' ? '💔' : 'ℹ️'}
+                </span>
+                <span className="flex-1">{item.text}</span>
+                <span className="text-gray-500 text-[10px]">{item.time}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-file.save(input_path)
-
-ext = filename.rsplit(".", 1)[1].lower()
-
-if ext in ["png", "jpg", "jpeg", "webp"]:
-    success = enhance_image(input_path, output_path)
-else:
-    success = enhance_video(input_path, output_path)
-
-if not success:
-    return jsonify({"error": "Enhancement failed"}), 500
-
-return jsonify({
-    "message": "Enhancement complete",
-    "download": f"/download/{os.path.basename(output_path)}"
-})
-
-@app.route("/download/<filename>") def download_file(filename): return send_from_directory(app.config["OUTPUT_FOLDER"], filename)
-
-if name == "main": app.run(debug=True, host="0.0.0.0", port=5000)
-
-----------------------------------------
-
-INSTALL COMMANDS
-
-----------------------------------------
-
-pip install flask opencv-python werkzeug
-
-python app.py
-
-NEXT UPGRADE:
-
-Replace starter enhancement with:
-
-Real-ESRGAN
-
-GFPGAN
-
-FFmpeg
-
-AI color grading
-
-true 4K upscale engine
-
-cloud GPU rendering
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
+    </div>
+  );
+}
