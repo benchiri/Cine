@@ -20,7 +20,7 @@
     </p>
   </div>
 
-  <div style="border:2px dashed #444;border-radius:20px;padding:30px;text-align:center;margin-bottom:20px;">
+  <div style="border:2px dashed #444;border-radius:20px;padding:30px;text-align:center;margin-bottom:20px;background:linear-gradient(180deg,#151515,#0d0d0d);box-shadow:inset 0 0 20px rgba(255,255,255,0.03);">
     <p style="margin-bottom:15px;">Upload your photo or video for AI cinematic enhancement</p>
     <input type="file" id="fileInput" accept="image/*,video/*" />
   </div>
@@ -33,7 +33,7 @@
     onclick="enhanceMedia()"
     style="width:100%;padding:16px;border:none;border-radius:16px;background:white;color:black;font-weight:bold;font-size:16px;cursor:pointer;"
   >
-    AI Cinematic Upgrade
+    ✨ AI Cinematic Upgrade
   </button>
 
   <div id="processing" style="display:none;text-align:center;margin-top:20px;color:#ccc;">
@@ -41,7 +41,13 @@
     stabilizing motion, reducing blur, and creating cinematic 4K quality...
   </div>
 
-  <div id="done" style="display:none;background:#1a1a1a;padding:20px;border-radius:16px;margin-top:20px;text-align:center;">
+  <div id="previewBox" style="display:none;background:#0f0f0f;padding:20px;border-radius:20px;margin-top:24px;border:1px solid #2a2a2a;">
+    <h2 style="margin-top:0;text-align:center;">Preview Result</h2>
+    <div id="previewContent" style="display:flex;justify-content:center;align-items:center;min-height:220px;border-radius:16px;overflow:hidden;background:#181818;">
+    </div>
+  </div>
+
+  <div id="done" style="display:none;background:#1a1a1a;padding:20px;border-radius:16px;margin-top:20px;text-align:center;border:1px solid #2a2a2a;">
     <h2>Enhancement Complete</h2>
     <p style="color:#bbb;">
       Your media now has stronger colors, clearer details,
@@ -58,12 +64,15 @@
     const fileNameBox = document.getElementById("fileNameBox");
     const processing = document.getElementById("processing");
     const done = document.getElementById("done");
+    const previewBox = document.getElementById("previewBox");
+    const previewContent = document.getElementById("previewContent");
 
     fileInput.addEventListener("change", function () {
       if (this.files.length > 0) {
         fileName.textContent = this.files[0].name;
         fileNameBox.style.display = "block";
         done.style.display = "none";
+        previewBox.style.display = "none";
       }
     });
 
@@ -79,6 +88,16 @@
       setTimeout(() => {
         processing.style.display = "none";
         done.style.display = "block";
+        previewBox.style.display = "block";
+
+        const file = fileInput.files[0];
+        const fileURL = URL.createObjectURL(file);
+
+        if (file.type.startsWith("image/")) {
+          previewContent.innerHTML = `<img src="${fileURL}" style="max-width:100%;max-height:400px;border-radius:14px;object-fit:cover;" />`;
+        } else if (file.type.startsWith("video/")) {
+          previewContent.innerHTML = `<video controls style="width:100%;max-height:400px;border-radius:14px;"><source src="${fileURL}" type="${file.type}"></video>`;
+        }
       }, 3500);
     }
   </script></body>
