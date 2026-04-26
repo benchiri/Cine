@@ -1,0 +1,422 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import './BuildingCrashGamePro.css';
+
+export default function BuildingCrashGamePro() {
+  const [balance, setBalance] = useState(1000);
+  const [betAmount, setBetAmount] = useState(100);
+  const [autoCashout, setAutoCashout] = useState(2.0);
+  const [multiplier, setMultiplier] = useState(1.0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [hasCrashed, setHasCrashed] = useState(false);
+  const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
+  const [crashPoint, setCrashPoint] = useState(null);
+  const [goldenRound, setGoldenRound] = useState(false);
+  const [gamePhase, setGamePhase] = useState('idle');
+  const [showResult, setShowResult] = useState(false);
+  const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
+  const [feed, setFeed] = useState([
+    { id: 1, text: "John cashed out at 2.45x", type: "cashout" },
+    { id: 2, text: "Mike crashed at 1.21x", type: "crash" },
+    { id: 3, text: "Sarah cashed out at 4.10x", type: "cashout" },
+  ]);
+
+  const intervalRef = useRef(null);
+  const currentMultiplierRef = useRef(1.0);
+  const gameActiveRef = useRef(false);
+  const betAmountRef = useRef(100);
+  const autoCashoutRef = useRef(2.0);
+  const cashoutTriggeredRef = useRef(false);
+  const consecutiveLossesRef = useRef(0);
+  const playerLifetimeProfitRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    betAmountRef.current = betAmount;
+  }, [betAmount]);
+
+  useEffect(() => {
+    autoCashoutRef.current = autoCashout;
+  }, [autoCashout]);
+
+  const safeMultiply = useCallback((a, b) => {
+    return Math.round((a * b) * 100) / 100;
+  }, []);
+
+  const generateCrashPoint = useCallback(() => {
+    const betSize = betAmountRef.current;
+    const totalBalance = balance;
+    const betPercentage = betSize / totalBalance;
+    
+    let houseEdgeMultiplier = 1.0;
+    
+    if (betSize > 200) houseEdgeMultiplier *= 0.85;
+    if (betSize > 500) houseEdgeMultiplier *= 0.75;
+    if (betSize > 1000) houseEdgeMultiplier *= 0.65;
+    
+    if (betPercentage > 0.2) houseEdgeMultiplier *= 0.9;
+    if (betPercentage > 0.4) houseEdgeMultiplier *= 0.8;
+    if (betPercentage > 0.6) houseEdgeMultiplier *= 0.7;
+    
+    if (playerLifetimeProfitRef.current > 500) houseEdgeMultiplier *= 0.9;
+    if (playerLifetimeProfitRef.current > 1000) houseEdgeMultiplier *= 0.85;
+    if (playerLifetimeProfitRef.current > 2000) houseEdgeMultiplier *= 0.8;
+    
+    if (consecutiveLossesRef.current > 3) houseEdgeMultiplier *= 1.15;
+    if (consecutiveLossesRef.current > 5) houseEdgeMultiplier *= 1.25;
+    
+    const randomFactor = 0.85 + (Math.random() * 0.3);
+    const basePoint = Math.max(1.1, (1 / (1 - Math.random())) * 0.97);
+    const adjustedPoint = basePoint * houseEdgeMultiplier * randomFactor;
+    
+    const goldenChance = Math.max(0.02, 0.12 * (1 - betPercentage));
+    const isGolden = Math.random() < goldenChance;
+    
+    let finalPoint;
+    if (isGolden) {
+      const goldenMax = Math.max(5, 50 * (1 - betPercentage));
+      finalPoint = 10 + Math.random() * goldenMax;
+    } else {
+      const maxMultiplier = Math.max(3, 10 * (1 - betPercentage * 0.5));
+      finalPoint = Math.min(adjustedPoint, maxMultiplier);
+    }
+    
+    finalPoint = Math.max(1.1, finalPoint);
+    
+    if (betSize > 500 && Math.random() < 0.15) {
+      finalPoint = Math.min(finalPoint, 1.15 + Math.random() * 0.3);
+    }
+    
+    return {
+      point: Math.round(finalPoint * 100) / 100,
+      isGolden
+    };
+  }, [balance]);
+
+  const startGame = useCallback(() => {
+    if (gameActiveRef.current || isRunning) return;
+    if (betAmount <= 0 || betAmount > balance) {
+      alert(betAmount <= 0 ? "Please enter a bet amount" : "Insufficient balance!");
+      return;
+    }
+
+    const { point, isGolden } = generateCrashPoint();
+    
+    currentMultiplierRef.current = 1.0;
+    cashoutTriggeredRef.current = false;
+    gameActiveRef.current = true;
+    
+    setCrashPoint(point);
+    setGoldenRound(isGolden);
+    setBalance(prev => prev - betAmount);
+    setMultiplier(1.0);
+    setCashoutMultiplier(null);
+    setHasCrashed(false);
+    setIsRunning(true);
+    setGamePhase('running');
+    setShowResult(false);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (!gameActiveRef.current) {
+        clearInterval(intervalRef.current);
+        return;
+      }
+
+      const newMultiplier = Math.round((currentMultiplierRef.current + 0.05) * 100) / 100;
+      currentMultiplierRef.current = newMultiplier;
+      
+      setMultiplier(newMultiplier);
+
+      if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
+        cashoutTriggeredRef.current = true;
+        const winnings = safeMultiply(betAmountRef.current, newMultiplier);
+        
+        clearInterval(intervalRef.current);
+        gameActiveRef.current = false;
+        
+        setBalance(prev => prev + winnings);
+        setCashoutMultiplier(newMultiplier);
+        setIsRunning(false);
+        setGamePhase('cashedout');
+        setShowResult(true);
+        
+        const profit = winnings - betAmountRef.current;
+        playerLifetimeProfitRef.current += profit;
+        consecutiveLossesRef.current = 0;
+        
+        setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
+        
+        setFeed(prev => [{ 
+          id: Date.now(), 
+          text: `You auto-cashed out at ${newMultiplier.toFixed(2)}x for $${winnings}`, 
+          type: "cashout" 
+        }, ...prev].slice(0, 20));
+        
+        return;
+      }
+
+      if (newMultiplier >= point) {
+        clearInterval(intervalRef.current);
+        gameActiveRef.current = false;
+        
+        setHasCrashed(true);
+        setIsRunning(false);
+        setGamePhase('crashed');
+        setShowResult(true);
+        
+        playerLifetimeProfitRef.current -= betAmountRef.current;
+        consecutiveLossesRef.current += 1;
+        
+        setHistory(prev => [point, ...prev].slice(0, 8));
+        
+        setFeed(prev => [{ 
+          id: Date.now(), 
+          text: `Game crashed at ${point.toFixed(2)}x`, 
+          type: "crash" 
+        }, ...prev].slice(0, 20));
+      }
+    }, 100);
+  }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply]);
+
+  const handleCashout = useCallback(() => {
+    if (!gameActiveRef.current || !isRunning || cashoutTriggeredRef.current) return;
+    
+    cashoutTriggeredRef.current = true;
+    const currentMultiplier = currentMultiplierRef.current;
+    const winnings = safeMultiply(betAmountRef.current, currentMultiplier);
+    
+    clearInterval(intervalRef.current);
+    gameActiveRef.current = false;
+    
+    setBalance(prev => prev + winnings);
+    setCashoutMultiplier(currentMultiplier);
+    setIsRunning(false);
+    setGamePhase('cashedout');
+    setShowResult(true);
+    
+    const profit = winnings - betAmountRef.current;
+    playerLifetimeProfitRef.current += profit;
+    consecutiveLossesRef.current = 0;
+    
+    setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
+    
+    setFeed(prev => [{ 
+      id: Date.now(), 
+      text: `You cashed out at ${currentMultiplier.toFixed(2)}x for $${winnings}`, 
+      type: "cashout" 
+    }, ...prev].slice(0, 20));
+  }, [isRunning, safeMultiply]);
+
+  const resetGame = useCallback(() => {
+    setShowResult(false);
+    setGamePhase('idle');
+    setMultiplier(1.0);
+    setHasCrashed(false);
+    setCashoutMultiplier(null);
+    setCrashPoint(null);
+    setGoldenRound(false);
+  }, []);
+
+  const quickBets = [10, 25, 50, 100, 250, 500];
+  const buildingHeight = isRunning ? Math.min(multiplier * 35, 370) : 0;
+
+  return (
+    <div className="game-container">
+      <div className="game-box">
+        <div className="header">
+          <h1 className="title">🏗️ Building Crash</h1>
+          <div className="status-badge">
+            <div className={`status-dot ${isRunning ? 'live' : 'waiting'}`} />
+            <span className="status-text">{isRunning ? 'Live' : 'Waiting'}</span>
+          </div>
+        </div>
+
+        <div className="balance-box">
+          <div className="balance-row">
+            <span className="balance-label">Balance</span>
+            <span className="balance-amount">
+              ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+          {gamePhase === 'cashedout' && showResult && (
+            <div className="profit-message">
+              +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+            </div>
+          )}
+          {gamePhase === 'crashed' && showResult && (
+            <div className="loss-message">
+              -${betAmount.toFixed(2)}
+            </div>
+          )}
+        </div>
+
+        <div className="quick-bets">
+          {quickBets.map(amount => (
+            <button
+              key={amount}
+              onClick={() => !isRunning && setBetAmount(amount)}
+              disabled={isRunning}
+              className={`quick-bet-btn ${betAmount === amount ? 'active' : ''}`}
+            >
+              ${amount}
+            </button>
+          ))}
+        </div>
+
+        <div className="input-group">
+          <div className="input-wrapper">
+            <label className="input-label">Bet Amount</label>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(Math.max(0, Number(e.target.value)))}
+              disabled={isRunning}
+              className="game-input"
+            />
+          </div>
+          <div className="input-wrapper">
+            <label className="input-label">Auto Cashout</label>
+            <input
+              type="number"
+              step="0.1"
+              min="1.1"
+              value={autoCashout}
+              onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
+              className="game-input"
+            />
+          </div>
+        </div>
+
+        <div className="game-area">
+          <div className="sky">
+            {[...Array(20)].map((_, i) => (
+              <div
+                key={i}
+                className="star"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 60}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  opacity: Math.random() * 0.5 + 0.3,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="ground">
+            <div className="ground-line" />
+          </div>
+
+          <div className="building-container">
+            <div
+              className={`building ${hasCrashed ? 'crashed' : ''} ${goldenRound ? 'golden' : ''}`}
+              style={{
+                height: `${buildingHeight}px`,
+                transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})`,
+              }}
+            />
+          </div>
+
+          {goldenRound && isRunning && !hasCrashed && (
+            <div className="golden-banner">
+              ⭐ GOLDEN ROUND ⭐
+            </div>
+          )}
+
+          {isRunning && !hasCrashed && (
+            <div className="multiplier-display">
+              {multiplier.toFixed(2)}x
+            </div>
+          )}
+
+          {hasCrashed && showResult && (
+            <div className="crash-overlay">
+              <span className="crash-emoji">💥</span>
+              <span className="crash-text">CRASHED!</span>
+              <span className="crash-point">at {crashPoint?.toFixed(2)}x</span>
+            </div>
+          )}
+
+          {gamePhase === 'cashedout' && showResult && !hasCrashed && (
+            <div className="cashout-overlay">
+              <span className="cashout-emoji">🎉</span>
+              <span className="cashout-amount">
+                +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+              </span>
+              <span className="cashout-multiplier">at {cashoutMultiplier?.toFixed(2)}x</span>
+            </div>
+          )}
+        </div>
+
+        <div className="buttons-container">
+          <button
+            onClick={showResult ? resetGame : startGame}
+            disabled={isRunning || (betAmount > balance || betAmount <= 0)}
+            className="start-btn"
+          >
+            {showResult ? '🔄 Play Again' : isRunning ? '🏃 Running...' : '🎮 Place Bet'}
+          </button>
+
+          <button
+            onClick={handleCashout}
+            disabled={!isRunning || cashoutTriggeredRef.current}
+            className="cashout-btn"
+          >
+            💰 Cash Out
+          </button>
+        </div>
+
+        <div className="history-section">
+          <div className="section-title">
+            <div className="dot blue" />
+            Recent Rounds
+          </div>
+          <div className="history-list">
+            {history.map((item, i) => (
+              <span
+                key={i}
+                className={`history-item ${
+                  item >= 10 ? 'purple' :
+                  item >= 5 ? 'orange' :
+                  item >= 2 ? 'yellow' : 'gray'
+                }`}
+              >
+                {item.toFixed(2)}x
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="feed-section">
+          <div className="section-title">
+            <div className="dot green pulse" />
+            Live Feed
+          </div>
+          <div className="feed-list">
+            {feed.map((item) => (
+              <div
+                key={item.id}
+                className={`feed-item ${item.type}`}
+              >
+                <span className="feed-icon">
+                  {item.type === 'cashout' ? '💚' : item.type === 'crash' ? '💔' : 'ℹ️'}
+                </span>
+                <span>{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
