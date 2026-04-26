@@ -3,1518 +3,672 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Building Crash Game</title>
+    <title>Crash Game - Live Casino</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: #000;
             color: white;
+            overflow-x: hidden;
         }
-
         .game-container {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            background: radial-gradient(ellipse at top, #1a1a3e, #0a0a1a);
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding-top: 80px;
+            padding-top: 120px;
         }
-
-        /* Top Navigation Bar */
         .top-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 30, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(10, 10, 30, 0.95); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
         }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .nav-logo {
-            font-size: 22px;
-            font-weight: 800;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .nav-balance {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-balance-amount {
-            color: #4ade80;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-btn {
-            padding: 10px 18px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .deposit-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-        }
-
-        .deposit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
-        }
-
-        .withdraw-btn {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: white;
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-        }
-
-        .withdraw-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
-        }
-
-        .settings-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            padding: 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        /* Live Users Bar */
+        .nav-left { display: flex; align-items: center; gap: 20px; }
+        .nav-logo { font-size: 22px; font-weight: 800; background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-balance { background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 20px;
+            display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-balance-amount { color: #4ade80; font-weight: 700; }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+        .nav-btn { padding: 10px 18px; border-radius: 12px; border: none; cursor: pointer;
+            font-weight: 600; font-size: 13px; transition: all 0.3s; text-transform: uppercase; }
+        .deposit-btn { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+        .withdraw-btn { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; }
+        .settings-btn { background: rgba(255,255,255,0.1); color: white; width: 42px; height: 42px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .live-users-bar {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            overflow-x: auto;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            z-index: 999;
-            white-space: nowrap;
+            position: fixed; top: 70px; left: 0; right: 0; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px); padding: 8px 20px; display: flex; align-items: center;
+            gap: 15px; overflow-x: auto; border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 999;
         }
+        .live-users-label { color: #ef4444; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 5px; }
+        .live-user-badge { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 15px;
+            font-size: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .live-user-bet { color: #fbbf24; font-weight: 700; }
+        .live-user-cashout { color: #4ade80; font-weight: 700; font-size: 11px; }
 
-        .live-users-label {
-            color: #ef4444;
-            font-weight: 700;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            animation: pulse 1.5s infinite;
-        }
-
-        .live-user-badge {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .live-user-bet {
-            color: #fbbf24;
-            font-weight: 700;
-        }
-
-        .live-user-cashout {
-            color: #4ade80;
-            font-weight: 700;
-            font-size: 11px;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal {
-            background: linear-gradient(135deg, #1e1e3a 0%, #2a2a4a 100%);
-            border-radius: 24px;
-            padding: 30px;
-            width: 90%;
-            max-width: 480px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .modal-close {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .currency-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .currency-option {
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .currency-option:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .currency-option.selected {
-            background: rgba(96, 165, 250, 0.2);
-            border-color: #60a5fa;
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .form-input:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
-        }
-
-        .quick-amounts {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .quick-amount-btn {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .quick-amount-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .modal-btn.primary {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
-        }
-
-        .modal-btn.danger {
-            background: linear-gradient(135deg, #dc2626, #ef4444);
-            color: white;
-            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
-        }
-
-        .transaction-history {
-            margin-top: 20px;
-        }
-
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s;
-        }
-
-        .transaction-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        /* Settings Styles */
-        .settings-section {
-            margin-bottom: 28px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .settings-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #e5e7eb;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-
-        .setting-label {
-            color: #d1d5db;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .setting-description {
-            color: #6b7280;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 52px;
-            height: 28px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #374151;
-            transition: 0.4s;
-            border-radius: 28px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background: linear-gradient(135deg, #059669, #10b981);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        .select-input {
-            padding: 10px 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .select-input option {
-            background: #1e1e3a;
-            color: white;
-        }
-
-        /* Game Box */
         .game-box {
-            width: 100%;
-            max-width: 520px;
-            background: rgba(20, 20, 40, 0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 100%; max-width: 520px; background: rgba(20,20,40,0.9); backdrop-filter: blur(20px);
+            border-radius: 28px; padding: 28px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .title { font-size: 28px; font-weight: 800; background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status-badge { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05);
+            padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .status-dot.countdown { background: #fbbf24; box-shadow: 0 0 10px #fbbf24; }
+        .status-dot.running { background: #4ade80; box-shadow: 0 0 15px #4ade80; animation: pulse 1.5s infinite; }
+        .status-dot.ended { background: #ef4444; }
+        .status-text { color: #9ca3af; font-size: 13px; font-weight: 600; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
+        .round-timer {
+            text-align: center; margin-bottom: 12px; font-size: 14px; color: #fbbf24; font-weight: 700;
         }
-
-        .title {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        .status-dot.live {
-            background: #4ade80;
-            box-shadow: 0 0 15px #4ade80;
-            animation: pulse 1.5s infinite;
-        }
-
-        .status-dot.waiting {
-            background: #6b7280;
-        }
-
-        .status-text {
-            color: #9ca3af;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
         .game-area {
-            position: relative;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            height: 420px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 24px;
+            position: relative; background: rgba(0,0,0,0.3); border-radius: 20px; height: 420px;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px;
         }
-
-        .sky {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom, #0a0a1e, #1a1a3e, #0a0a1e);
-        }
-
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 2s infinite;
-        }
-
-        .ground {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 70px;
-            background: linear-gradient(to top, #1a1a3e, #2a2a4e);
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .building-container {
-            position: absolute;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .building {
-            width: 120px;
-            border-radius: 10px 10px 0 0;
-            max-height: 370px;
-            transition: height 0.08s linear;
-            transform-origin: bottom center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .building.normal {
-            background: linear-gradient(to top, #1e40af, #3b82f6, #60a5fa);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
-        }
-
-        .building.crashed {
-            background: linear-gradient(to top, #991b1b, #dc2626, #ef4444);
-            box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
-            animation: shake 0.6s ease-in-out;
-        }
-
-        .building.golden {
-            background: linear-gradient(to top, #92400e, #d97706, #fbbf24);
-            box-shadow: 0 0 40px rgba(251, 191, 36, 0.6);
-        }
-
-        .building-windows {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            padding: 10px;
-        }
-
-        .window-row {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .window {
-            width: 20px;
-            height: 15px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-            animation: windowGlow 1.5s infinite;
-        }
-
+        .sky { position: absolute; inset: 0; background: linear-gradient(to bottom, #0a0a1e, #1a1a3e, #0a0a1e); }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle 2s infinite; }
+        .ground { position: absolute; bottom: 0; width: 100%; height: 70px;
+            background: linear-gradient(to top, #1a1a3e, #2a2a4e); border-top: 2px solid rgba(255,255,255,0.1); }
+        .building-container { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); }
+        .building { width: 120px; border-radius: 10px 10px 0 0; max-height: 370px;
+            transition: height 0.08s linear; transform-origin: bottom center; position: relative; overflow: hidden; }
+        .building.normal { background: linear-gradient(to top, #1e40af, #3b82f6, #60a5fa); box-shadow: 0 0 30px rgba(59,130,246,0.5); }
+        .building.crashed { background: linear-gradient(to top, #991b1b, #dc2626, #ef4444); animation: shake 0.6s; }
+        .building.golden { background: linear-gradient(to top, #92400e, #d97706, #fbbf24); box-shadow: 0 0 40px rgba(251,191,36,0.6); }
+        .building-windows { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-around; padding: 10px; }
+        .window-row { display: flex; justify-content: space-around; }
+        .window { width: 20px; height: 15px; background: rgba(255,255,255,0.3); border-radius: 3px; animation: windowGlow 1.5s infinite; }
         .golden-banner {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(to right, #d97706, #fbbf24);
-            color: black;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: 800;
-            font-size: 14px;
-            animation: bounce 1s infinite;
-            z-index: 10;
-            box-shadow: 0 4px 20px rgba(251, 191, 36, 0.5);
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(to right, #d97706, #fbbf24); color: black; padding: 8px 20px;
+            border-radius: 25px; font-weight: 800; font-size: 14px; animation: bounce 1s infinite; z-index: 10;
         }
-
         .multiplier-display {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 72px;
-            font-weight: 900;
-            z-index: 5;
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 72px; font-weight: 900; color: #fbbf24; text-shadow: 0 0 40px rgba(255,255,255,0.3);
         }
-
-        .multiplier-display.normal {
-            color: #fbbf24;
-        }
-
         .crash-overlay, .cashout-overlay {
-            position: absolute;
-            inset: 0;
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
+            position: absolute; inset: 0; backdrop-filter: blur(8px); display: flex;
+            flex-direction: column; align-items: center; justify-content: center; z-index: 20;
         }
+        .crash-overlay { background: rgba(185,28,28,0.7); }
+        .cashout-overlay { background: rgba(22,163,74,0.7); }
+        .overlay-emoji { font-size: 80px; margin-bottom: 10px; }
+        .overlay-text { font-size: 48px; font-weight: 900; margin-bottom: 5px; }
+        .overlay-subtext { font-size: 22px; opacity: 0.9; }
 
-        .crash-overlay {
-            background: rgba(185, 28, 28, 0.7);
+        .players-panel {
+            background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; margin-bottom: 12px;
+            max-height: 120px; overflow-y: auto;
         }
+        .players-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #9ca3af; }
+        .player-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; }
+        .player-name { color: #d1d5db; }
+        .player-bet { color: #fbbf24; }
+        .player-result { font-weight: 700; }
+        .player-result.win { color: #4ade80; }
+        .player-result.lose { color: #ef4444; }
 
-        .cashout-overlay {
-            background: rgba(22, 163, 74, 0.7);
-        }
+        .quick-bets { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 12px; }
+        .quick-bet-btn { padding: 10px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600;
+            cursor: pointer; color: #9ca3af; background: #1f2937; }
+        .quick-bet-btn.active { background: #2563eb; color: white; }
+        .quick-bet-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .overlay-emoji {
-            font-size: 80px;
-            margin-bottom: 10px;
-        }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .input-wrapper { position: relative; }
+        .input-label { color: #9ca3af; font-size: 12px; margin-bottom: 6px; display: block; }
+        .game-input { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151;
+            border-radius: 12px; color: white; font-size: 14px; outline: none; }
+        .game-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .overlay-text {
-            font-size: 48px;
-            font-weight: 900;
-            margin-bottom: 5px;
-        }
+        .buttons-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .start-btn, .cashout-btn { padding: 14px; border-radius: 14px; border: none; font-size: 15px;
+            font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .start-btn { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+        .cashout-btn { background: linear-gradient(135deg, #f59e0b, #f97316); color: black; }
+        .start-btn:disabled, .cashout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .overlay-subtext {
-            font-size: 22px;
-            opacity: 0.9;
-        }
-
-        .buttons-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .start-btn, .cashout-btn {
-            padding: 16px;
-            border-radius: 16px;
-            border: none;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .start-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: white;
-            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-        }
-
-        .cashout-btn {
-            background: linear-gradient(135deg, #f59e0b, #f97316);
-            color: black;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-
-        .start-btn:hover:not(:disabled), .cashout-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-        }
-
-        .start-btn:disabled, .cashout-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .history-section, .feed-section {
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #e5e7eb;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
+        .history-section, .feed-section { margin-bottom: 16px; }
+        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
         .dot.blue { background: #60a5fa; }
-        .dot.green { 
-            background: #4ade80;
-            box-shadow: 0 0 10px #4ade80;
-        }
+        .dot.green { background: #4ade80; }
+        .history-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .history-item { padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid #4b5563; }
+        .history-item.purple { background: rgba(147,51,234,0.3); color: #c084fc; }
+        .history-item.orange { background: rgba(234,88,12,0.3); color: #fb923c; }
+        .history-item.yellow { background: rgba(234,179,8,0.3); color: #fbbf24; }
+        .history-item.gray { background: rgba(255,255,255,0.05); color: #9ca3af; }
+        .feed-list { max-height: 150px; overflow-y: auto; }
+        .feed-item { padding: 8px 12px; margin-bottom: 4px; border-radius: 8px; font-size: 12px;
+            display: flex; align-items: center; gap: 8px; border: 1px solid; }
+        .feed-item.cashout { background: rgba(22,163,74,0.15); border-color: rgba(22,163,74,0.3); }
+        .feed-item.crash { background: rgba(220,38,38,0.15); border-color: rgba(220,38,38,0.3); }
 
-        .history-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        /* M-Pesa style modal */
+        .mpesa-prompt {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1e1e1e; color: white; padding: 30px; border-radius: 20px;
+            z-index: 3000; width: 90%; max-width: 350px; text-align: center;
+            border: 2px solid #4ade80; box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
+        .mpesa-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: #4ade80; }
+        .mpesa-amount { font-size: 28px; font-weight: 900; margin-bottom: 15px; }
+        .mpesa-input { width: 100%; padding: 12px; background: #333; border: 1px solid #555;
+            border-radius: 10px; color: white; font-size: 18px; text-align: center; margin-bottom: 15px; }
+        .mpesa-btn { background: #4ade80; color: black; border: none; padding: 12px 30px;
+            border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; width: 100%; }
+        .mpesa-btn:disabled { opacity: 0.6; }
 
-        .history-item {
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .history-item.purple { background: rgba(147, 51, 234, 0.3); color: #c084fc; }
-        .history-item.orange { background: rgba(234, 88, 12, 0.3); color: #fb923c; }
-        .history-item.yellow { background: rgba(234, 179, 8, 0.3); color: #fbbf24; }
-        .history-item.gray { background: rgba(255, 255, 255, 0.05); color: #9ca3af; }
-
-        .feed-list {
-            max-height: 180px;
-            overflow-y: auto;
-        }
-
-        .feed-item {
-            padding: 10px 14px;
-            margin-bottom: 6px;
-            border-radius: 10px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        .feed-item.cashout {
-            background: rgba(22, 163, 74, 0.15);
-            border-color: rgba(22, 163, 74, 0.3);
-        }
-
-        .feed-item.crash {
-            background: rgba(220, 38, 38, 0.15);
-            border-color: rgba(220, 38, 38, 0.3);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes windowGlow {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-        }
-
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-
-        .currency-symbol {
-            font-size: 14px;
-            opacity: 0.7;
-        }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        @keyframes twinkle { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+        @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        @keyframes shake { 0%,100%{transform:translateX(0);} 10%,30%,50%,70%,90%{transform:translateX(-5px);} 20%,40%,60%,80%{transform:translateX(5px);} }
+        @keyframes windowGlow { 0%,100%{opacity:0.3;} 50%{opacity:0.8;} }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+        input[type=number] { -moz-appearance:textfield; }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+<div id="root"></div>
 
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React;
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
 
-        const currencies = {
-            KSH: { symbol: 'KSh', rate: 1, name: 'Kenyan Shilling' },
-            USD: { symbol: '$', rate: 0.0067, name: 'US Dollar' },
-            EUR: { symbol: '€', rate: 0.0062, name: 'Euro' },
-            GBP: { symbol: '£', rate: 0.0053, name: 'British Pound' },
-            UGX: { symbol: 'USh', rate: 25.5, name: 'Ugandan Shilling' },
-            TZS: { symbol: 'TSh', rate: 17.2, name: 'Tanzanian Shilling' },
-        };
+const currencies = {
+    KSH: { symbol: 'KSh', rate: 1, name: 'Kenyan Shilling' },
+    USD: { symbol: '$', rate: 0.0067, name: 'US Dollar' },
+};
 
-        const fakeUsers = [
-            { name: 'ProGamer254', bets: [25000, 34124, 50000, 12500, 40000, 10000] },
-            { name: 'LuckyStar', bets: [30000, 45000, 20000, 35000, 15000, 28000] },
-            { name: 'BigWinner', bets: [40000, 25000, 35000, 30000, 45000, 22000] },
-            { name: 'CashKing', bets: [50000, 30000, 40000, 25000, 35000, 28000] },
-            { name: 'BetMaster', bets: [20000, 35000, 45000, 30000, 25000, 40000] },
-            { name: 'WinStreak', bets: [35000, 25000, 30000, 40000, 20000, 32000] },
-            { name: 'GoldenHand', bets: [28000, 42000, 25000, 35000, 30000, 45000] },
-            { name: 'RiskTaker', bets: [45000, 20000, 35000, 25000, 40000, 30000] },
-            { name: 'CrashKing', bets: [32000, 38000, 25000, 42000, 30000, 35000] },
-            { name: 'MegaBoss', bets: [50000, 35000, 45000, 28000, 40000, 32000] },
-        ];
+const fakeUserNames = [
+    'ProGamer254', 'LuckyStar', 'BigWinner', 'CashKing', 'BetMaster',
+    'WinStreak', 'GoldenHand', 'RiskTaker', 'CrashKing', 'MegaBoss',
+    'AcePlayer', 'SilentWolf', 'QuickCash', 'BoltBet', 'SilverFox',
+    'DarkHorse', 'NeonNinja', 'PixelPirate', 'CyberAce', 'TurboTiger'
+];
 
-        function BuildingCrashGamePro() {
-            const [balance, setBalance] = useState(100000);
-            const [betAmount, setBetAmount] = useState(5000);
-            const [autoCashout, setAutoCashout] = useState(2.0);
-            const [multiplier, setMultiplier] = useState(1.0);
-            const [isRunning, setIsRunning] = useState(false);
-            const [hasCrashed, setHasCrashed] = useState(false);
-            const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
-            const [crashPoint, setCrashPoint] = useState(null);
-            const [goldenRound, setGoldenRound] = useState(false);
-            const [gamePhase, setGamePhase] = useState('idle');
-            const [showResult, setShowResult] = useState(false);
-            const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
-            const [feed, setFeed] = useState([]);
-            
-            // New states
-            const [showDeposit, setShowDeposit] = useState(false);
-            const [showWithdraw, setShowWithdraw] = useState(false);
-            const [showSettings, setShowSettings] = useState(false);
-            const [selectedCurrency, setSelectedCurrency] = useState('KSH');
-            const [depositAmount, setDepositAmount] = useState(10000);
-            const [withdrawAmount, setWithdrawAmount] = useState(10000);
-            const [transactions, setTransactions] = useState([
-                { id: 1, type: 'deposit', amount: 50000, date: '2024-01-15' },
-                { id: 2, type: 'withdraw', amount: 20000, date: '2024-01-14' },
-                { id: 3, type: 'deposit', amount: 100000, date: '2024-01-13' },
-            ]);
-            const [liveUsers, setLiveUsers] = useState([]);
-            
-            // Settings
-            const [soundEnabled, setSoundEnabled] = useState(true);
-            const [musicEnabled, setMusicEnabled] = useState(false);
-            const [animationsEnabled, setAnimationsEnabled] = useState(true);
-            const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-            const [darkMode, setDarkMode] = useState(true);
-            const [language, setLanguage] = useState('english');
-            const [autoCashoutDefault, setAutoCashoutDefault] = useState(2.0);
+function generateFakePlayer() {
+    const name = fakeUserNames[Math.floor(Math.random() * fakeUserNames.length)];
+    const betAmounts = [1000, 2500, 5000, 7500, 10000, 12000, 15000, 20000, 25000, 34124, 40000, 50000, 100000];
+    const bet = betAmounts[Math.floor(Math.random() * betAmounts.length)];
+    return { name, bet };
+}
 
-            const intervalRef = useRef(null);
-            const currentMultiplierRef = useRef(1.0);
-            const gameActiveRef = useRef(false);
-            const betAmountRef = useRef(5000);
-            const autoCashoutRef = useRef(2.0);
-            const cashoutTriggeredRef = useRef(false);
-            const consecutiveLossesRef = useRef(0);
-            const playerLifetimeProfitRef = useRef(0);
-            const fakeUserIntervalsRef = useRef([]);
+function BuildingCrashGamePro() {
+    const [balance, setBalance] = useState(50000);
+    const [betAmount, setBetAmount] = useState(5000);
+    const [autoCashout, setAutoCashout] = useState(2.0);
+    const [selectedCurrency, setSelectedCurrency] = useState('KSH');
+    const currency = currencies[selectedCurrency];
+    const formatCurrency = (amt) => `${currency.symbol} ${amt.toLocaleString()}`;
 
-            const currency = currencies[selectedCurrency];
+    // Round state: 'countdown' | 'running' | 'ended'
+    const [roundState, setRoundState] = useState('countdown');
+    const [countdown, setCountdown] = useState(10);
+    const [multiplier, setMultiplier] = useState(1.0);
+    const [crashPoint, setCrashPoint] = useState(null);
+    const [goldenRound, setGoldenRound] = useState(false);
+    const [hasCrashed, setHasCrashed] = useState(false);
+    const [cashedOut, setCashedOut] = useState(false);
+    const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
+    const [showResultOverlay, setShowResultOverlay] = useState(false);
+    const [history, setHistory] = useState([1.45,2.33,5.21,1.12,3.45,1.89,2.67,4.21]);
+    const [feed, setFeed] = useState([]);
 
-            const formatCurrency = (amount) => {
-                return `${currency.symbol} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-            };
+    // Fake players for current round
+    const [fakePlayers, setFakePlayers] = useState([]);
+    const [userBetPlaced, setUserBetPlaced] = useState(false);
 
-            // Generate fake live users
-            useEffect(() => {
-                const generateFakeUsers = () => {
-                    const numUsers = 15 + Math.floor(Math.random() * 25);
-                    const users = [];
-                    for (let i = 0; i < numUsers; i++) {
-                        const fakeUser = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
-                        const randomBet = fakeUser.bets[Math.floor(Math.random() * fakeUser.bets.length)];
-                        const willCashout = Math.random() < 0.4;
-                        const cashoutAt = willCashout ? (1.3 + Math.random() * 4).toFixed(2) : null;
-                        
-                        users.push({
-                            id: Date.now() + i,
-                            name: fakeUser.name,
-                            bet: randomBet,
-                            cashoutMultiplier: cashoutAt,
-                            won: willCashout
-                        });
-                    }
-                    setLiveUsers(users);
-                };
+    // Modals
+    const [showDeposit, setShowDeposit] = useState(false);
+    const [showWithdraw, setShowWithdraw] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [depositAmount, setDepositAmount] = useState(10000);
+    // M-Pesa simulation
+    const [mpesaStep, setMpesaStep] = useState(null); // null, 'confirm', 'processing', 'success'
+    const [mpesaPin, setMpesaPin] = useState('');
+    const [mpesaAmount, setMpesaAmount] = useState(0);
 
-                generateFakeUsers();
-                const interval = setInterval(generateFakeUsers, 8000);
-                return () => clearInterval(interval);
-            }, []);
+    const [transactions, setTransactions] = useState([
+        { id:1, type:'deposit', amount:50000, date:'2024-12-20' },
+        { id:2, type:'withdraw', amount:20000, date:'2024-12-19' },
+    ]);
 
-            // Generate fake game feed
-            useEffect(() => {
-                const fakeFeedItems = [];
-                for (let i = 0; i < 8; i++) {
-                    const fakeUser = fakeUsers[Math.floor(Math.random() * fakeUsers.length)];
-                    const randomBet = fakeUser.bets[Math.floor(Math.random() * fakeUser.bets.length)];
-                    const won = Math.random() < 0.4;
-                    const cashoutAt = won ? (1.5 + Math.random() * 5).toFixed(2) : (1.0 + Math.random() * 0.5).toFixed(2);
-                    
-                    fakeFeedItems.push({
-                        id: Date.now() - i * 1000,
-                        text: won 
-                            ? `${fakeUser.name} cashed out at ${cashoutAt}x - Won ${formatCurrency(Math.floor(randomBet * cashoutAt))}`
-                            : `${fakeUser.name} crashed at ${cashoutAt}x - Lost ${formatCurrency(randomBet)}`,
-                        type: won ? 'cashout' : 'crash'
-                    });
+    // Refs
+    const intervalRef = useRef(null);
+    const countdownRef = useRef(null);
+    const roundActiveRef = useRef(false);
+    const currentMultiplierRef = useRef(1.0);
+    const userBetRef = useRef(null); // { bet, autoCashout }
+
+    // Auto-round cycle
+    const startCountdown = useCallback(() => {
+        setRoundState('countdown');
+        setCountdown(10);
+        setMultiplier(1.0);
+        setHasCrashed(false);
+        setCashedOut(false);
+        setCashoutMultiplier(null);
+        setShowResultOverlay(false);
+        setUserBetPlaced(false);
+        userBetRef.current = null;
+        currentMultiplierRef.current = 1.0;
+        setGoldenRound(false);
+
+        // Generate fake players for this round
+        const numFake = 8 + Math.floor(Math.random() * 12);
+        const players = [];
+        for (let i=0; i<numFake; i++) players.push(generateFakePlayer());
+        setFakePlayers(players);
+
+        // Countdown timer
+        countdownRef.current = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(countdownRef.current);
+                    startRunning();
+                    return 0;
                 }
-                setFeed(fakeFeedItems);
-            }, []);
+                return prev - 1;
+            });
+        }, 1000);
+    }, []);
 
-            useEffect(() => {
-                return () => {
-                    if (intervalRef.current) clearInterval(intervalRef.current);
-                };
-            }, []);
+    const generateCrashPoint = useCallback(() => {
+        let houseEdge = 1.0;
+        if (userBetRef.current) {
+            const betSize = userBetRef.current.bet;
+            if (betSize > 20000) houseEdge *= 0.85;
+            if (betSize > 50000) houseEdge *= 0.75;
+        }
+        const randomFactor = 0.85 + Math.random() * 0.3;
+        const base = Math.max(1.1, (1/(1-Math.random()))*0.97);
+        const adjusted = base * houseEdge * randomFactor;
+        const goldenChance = 0.1;
+        const isGolden = Math.random() < goldenChance;
+        let final = isGolden ? 10 + Math.random()*40 : Math.min(adjusted, 10);
+        final = Math.max(1.1, Math.round(final*100)/100);
+        return { point: final, isGolden };
+    }, []);
 
-            useEffect(() => { betAmountRef.current = betAmount; }, [betAmount]);
-            useEffect(() => { autoCashoutRef.current = autoCashout; }, [autoCashout]);
+    const startRunning = useCallback(() => {
+        const { point, isGolden } = generateCrashPoint();
+        setCrashPoint(point);
+        setGoldenRound(isGolden);
+        setRoundState('running');
+        setHasCrashed(false);
+        setCashedOut(false);
+        roundActiveRef.current = true;
+        currentMultiplierRef.current = 1.0;
 
-            const formatAmount = (amount) => formatCurrency(amount);
-            const safeMultiply = useCallback((a, b) => Math.round((a * b) * 100) / 100, []);
-
-            const generateCrashPoint = useCallback(() => {
-                const betSize = betAmountRef.current;
-                const totalBalance = balance;
-                const betPercentage = betSize / totalBalance;
-                let houseEdgeMultiplier = 1.0;
-                
-                if (betSize > 20000) houseEdgeMultiplier *= 0.85;
-                if (betSize > 50000) houseEdgeMultiplier *= 0.75;
-                if (betSize > 100000) houseEdgeMultiplier *= 0.65;
-                if (betPercentage > 0.2) houseEdgeMultiplier *= 0.9;
-                if (betPercentage > 0.4) houseEdgeMultiplier *= 0.8;
-                if (betPercentage > 0.6) houseEdgeMultiplier *= 0.7;
-                if (playerLifetimeProfitRef.current > 50000) houseEdgeMultiplier *= 0.9;
-                if (playerLifetimeProfitRef.current > 100000) houseEdgeMultiplier *= 0.85;
-                if (consecutiveLossesRef.current > 3) houseEdgeMultiplier *= 1.15;
-                if (consecutiveLossesRef.current > 5) houseEdgeMultiplier *= 1.25;
-                
-                const randomFactor = 0.85 + (Math.random() * 0.3);
-                const basePoint = Math.max(1.1, (1 / (1 - Math.random())) * 0.97);
-                const adjustedPoint = basePoint * houseEdgeMultiplier * randomFactor;
-                const goldenChance = Math.max(0.02, 0.12 * (1 - betPercentage));
-                const isGolden = Math.random() < goldenChance;
-                
-                let finalPoint;
-                if (isGolden) {
-                    const goldenMax = Math.max(5, 50 * (1 - betPercentage));
-                    finalPoint = 10 + Math.random() * goldenMax;
-                } else {
-                    const maxMultiplier = Math.max(3, 10 * (1 - betPercentage * 0.5));
-                    finalPoint = Math.min(adjustedPoint, maxMultiplier);
-                }
-                
-                finalPoint = Math.max(1.1, finalPoint);
-                if (betSize > 50000 && Math.random() < 0.15) {
-                    finalPoint = Math.min(finalPoint, 1.15 + Math.random() * 0.3);
-                }
-                
-                return { point: Math.round(finalPoint * 100) / 100, isGolden };
-            }, [balance]);
-
-            const startGame = useCallback(() => {
-                if (gameActiveRef.current || isRunning) return;
-                if (betAmount <= 0 || betAmount > balance) {
-                    alert(betAmount <= 0 ? "Please enter a bet amount" : "Insufficient balance!");
-                    return;
-                }
-
-                const { point, isGolden } = generateCrashPoint();
-                currentMultiplierRef.current = 1.0;
-                cashoutTriggeredRef.current = false;
-                gameActiveRef.current = true;
-                
-                setCrashPoint(point);
-                setGoldenRound(isGolden);
-                setBalance(prev => prev - betAmount);
-                setMultiplier(1.0);
-                setCashoutMultiplier(null);
-                setHasCrashed(false);
-                setIsRunning(true);
-                setGamePhase('running');
-                setShowResult(false);
-
-                if (intervalRef.current) clearInterval(intervalRef.current);
-
-                intervalRef.current = setInterval(() => {
-                    if (!gameActiveRef.current) {
-                        clearInterval(intervalRef.current);
-                        return;
+        // Simulate fake players' cashouts
+        fakePlayers.forEach(p => {
+            const willCash = Math.random() < 0.35;
+            if (willCash) {
+                const cashAt = 1.3 + Math.random() * (point - 1.2);
+                setTimeout(() => {
+                    if (roundActiveRef.current) {
+                        setFakePlayers(prev => prev.map(fp => fp.name === p.name ? {...fp, cashout: cashAt.toFixed(2), won: true} : fp));
                     }
+                }, cashAt * 1000);
+            }
+        });
 
-                    const newMultiplier = Math.round((currentMultiplierRef.current + 0.05) * 100) / 100;
-                    currentMultiplierRef.current = newMultiplier;
-                    setMultiplier(newMultiplier);
+        intervalRef.current = setInterval(() => {
+            if (!roundActiveRef.current) return;
+            const newMult = Math.round((currentMultiplierRef.current + 0.05)*100)/100;
+            currentMultiplierRef.current = newMult;
+            setMultiplier(newMult);
 
-                    if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
-                        cashoutTriggeredRef.current = true;
-                        const winnings = safeMultiply(betAmountRef.current, newMultiplier);
-                        clearInterval(intervalRef.current);
-                        gameActiveRef.current = false;
-                        
-                        setBalance(prev => prev + winnings);
-                        setCashoutMultiplier(newMultiplier);
-                        setIsRunning(false);
-                        setGamePhase('cashedout');
-                        setShowResult(true);
-                        
-                        playerLifetimeProfitRef.current += (winnings - betAmountRef.current);
-                        consecutiveLossesRef.current = 0;
-                        
-                        setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
-                        setFeed(prev => [{ 
-                            id: Date.now(), 
-                            text: `You auto-cashed out at ${newMultiplier.toFixed(2)}x - Won ${formatCurrency(winnings)}`, 
-                            type: "cashout" 
-                        }, ...prev].slice(0, 30));
-                        return;
-                    }
+            // User auto-cashout
+            if (userBetRef.current && !cashedOut && newMult >= userBetRef.current.autoCashout) {
+                handleUserCashout(newMult);
+                return;
+            }
 
-                    if (newMultiplier >= point) {
-                        clearInterval(intervalRef.current);
-                        gameActiveRef.current = false;
-                        
-                        setHasCrashed(true);
-                        setIsRunning(false);
-                        setGamePhase('crashed');
-                        setShowResult(true);
-                        
-                        playerLifetimeProfitRef.current -= betAmountRef.current;
-                        consecutiveLossesRef.current += 1;
-                        
-                        setHistory(prev => [point, ...prev].slice(0, 8));
-                        setFeed(prev => [{ 
-                            id: Date.now(), 
-                            text: `Game crashed at ${point.toFixed(2)}x - Lost ${formatCurrency(betAmountRef.current)}`, 
-                            type: "crash" 
-                        }, ...prev].slice(0, 30));
-                    }
-                }, 100);
-            }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply, formatCurrency]);
-
-            const handleCashout = useCallback(() => {
-                if (!gameActiveRef.current || !isRunning || cashoutTriggeredRef.current) return;
-                
-                cashoutTriggeredRef.current = true;
-                const currentMultiplier = currentMultiplierRef.current;
-                const winnings = safeMultiply(betAmountRef.current, currentMultiplier);
-                
+            // Crash
+            if (newMult >= point) {
                 clearInterval(intervalRef.current);
-                gameActiveRef.current = false;
-                
-                setBalance(prev => prev + winnings);
-                setCashoutMultiplier(currentMultiplier);
-                setIsRunning(false);
-                setGamePhase('cashedout');
-                setShowResult(true);
-                
-                playerLifetimeProfitRef.current += (winnings - betAmountRef.current);
-                consecutiveLossesRef.current = 0;
-                
-                setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
-                setFeed(prev => [{ 
-                    id: Date.now(), 
-                    text: `You cashed out at ${currentMultiplier.toFixed(2)}x - Won ${formatCurrency(winnings)}`, 
-                    type: "cashout" 
-                }, ...prev].slice(0, 30));
-            }, [isRunning, safeMultiply, formatCurrency]);
+                roundActiveRef.current = false;
+                setHasCrashed(true);
+                setRoundState('ended');
+                setShowResultOverlay(true);
+                setHistory(prev => [point, ...prev].slice(0,8));
+                setFeed(prev => [{ id: Date.now(), text: `Round crashed at ${point.toFixed(2)}x`, type:'crash' }, ...prev].slice(0,30));
+                setTimeout(() => startCountdown(), 5000);
+            }
+        }, 100);
+    }, [fakePlayers, cashedOut, generateCrashPoint, startCountdown]);
 
-            const resetGame = useCallback(() => {
-                setShowResult(false);
-                setGamePhase('idle');
-                setMultiplier(1.0);
-                setHasCrashed(false);
-                setCashoutMultiplier(null);
-                setCrashPoint(null);
-                setGoldenRound(false);
-            }, []);
+    const handleUserCashout = (mult) => {
+        if (cashedOut || !userBetRef.current) return;
+        clearInterval(intervalRef.current);
+        roundActiveRef.current = false;
+        const winnings = Math.round(userBetRef.current.bet * mult);
+        setBalance(prev => prev + winnings);
+        setCashoutMultiplier(mult);
+        setCashedOut(true);
+        setRoundState('ended');
+        setShowResultOverlay(true);
+        setHistory(prev => [mult, ...prev].slice(0,8));
+        setFeed(prev => [{ id: Date.now(), text: `You cashed out at ${mult.toFixed(2)}x +${formatCurrency(winnings)}`, type:'cashout' }, ...prev].slice(0,30));
+        setTimeout(() => startCountdown(), 5000);
+    };
 
-            const handleDeposit = () => {
-                if (depositAmount > 0) {
-                    setBalance(prev => prev + depositAmount);
-                    setTransactions(prev => [{
-                        id: Date.now(), type: 'deposit', amount: depositAmount,
-                        date: new Date().toISOString().split('T')[0]
-                    }, ...prev]);
-                    setShowDeposit(false);
-                }
-            };
+    // Place bet before round starts
+    const placeBet = () => {
+        if (roundState !== 'countdown') return;
+        if (betAmount <= 0 || betAmount > balance) {
+            alert('Invalid bet amount');
+            return;
+        }
+        setBalance(prev => prev - betAmount);
+        userBetRef.current = { bet: betAmount, autoCashout: autoCashout };
+        setUserBetPlaced(true);
+    };
 
-            const handleWithdraw = () => {
-                if (withdrawAmount > 0 && withdrawAmount <= balance) {
-                    setBalance(prev => prev - withdrawAmount);
-                    setTransactions(prev => [{
-                        id: Date.now(), type: 'withdraw', amount: withdrawAmount,
-                        date: new Date().toISOString().split('T')[0]
-                    }, ...prev]);
-                    setShowWithdraw(false);
-                } else {
-                    alert('Insufficient balance!');
-                }
-            };
+    // Manual cashout
+    const manualCashout = () => {
+        if (roundState !== 'running' || !userBetRef.current || cashedOut) return;
+        handleUserCashout(currentMultiplierRef.current);
+    };
 
-            const quickBets = [1000, 5000, 10000, 25000, 50000, 100000];
-            const buildingHeight = isRunning ? Math.min(multiplier * 35, 370) : 0;
+    // Initial round start
+    useEffect(() => {
+        startCountdown();
+        return () => {
+            clearInterval(intervalRef.current);
+            clearInterval(countdownRef.current);
+        };
+    }, []);
 
-            return (
-                <>
-                    <div className="top-nav">
-                        <div className="nav-left">
-                            <div className="nav-logo">🎮 Crash Game</div>
-                            <div className="nav-balance">
-                                <span>💰</span>
-                                <span className="nav-balance-amount">{formatCurrency(balance)}</span>
-                            </div>
+    // Deposit with M-Pesa simulation
+    const initiateDeposit = () => {
+        if (depositAmount <= 0) return;
+        setMpesaAmount(depositAmount);
+        setMpesaStep('confirm');
+    };
+
+    const confirmMpesa = () => {
+        if (mpesaPin.length < 4) return;
+        setMpesaStep('processing');
+        setTimeout(() => {
+            setBalance(prev => prev + mpesaAmount);
+            setTransactions(prev => [{ id: Date.now(), type:'deposit', amount: mpesaAmount, date: new Date().toISOString().split('T')[0] }, ...prev]);
+            setMpesaStep('success');
+            setTimeout(() => {
+                setMpesaStep(null);
+                setShowDeposit(false);
+            }, 2000);
+        }, 3000);
+    };
+
+    const handleWithdraw = () => {
+        const amt = parseInt(prompt('Enter amount to withdraw:'));
+        if (amt > 0 && amt <= balance) {
+            setBalance(prev => prev - amt);
+            setTransactions(prev => [{ id: Date.now(), type:'withdraw', amount: amt, date: new Date().toISOString().split('T')[0] }, ...prev]);
+            alert(`Withdrawal of ${formatCurrency(amt)} successful.`);
+            setShowWithdraw(false);
+        } else if (amt) {
+            alert('Insufficient balance or invalid amount.');
+        }
+    };
+
+    const quickBets = [1000, 5000, 10000, 25000, 50000, 100000];
+    const buildingHeight = roundState === 'running' ? Math.min(multiplier * 35, 370) : 0;
+
+    return (
+        <>
+            <div className="top-nav">
+                <div className="nav-left">
+                    <div className="nav-logo">🎮 Crash Live</div>
+                    <div className="nav-balance">
+                        <span>💰</span>
+                        <span className="nav-balance-amount">{formatCurrency(balance)}</span>
+                    </div>
+                </div>
+                <div className="nav-right">
+                    <button className="nav-btn deposit-btn" onClick={() => setShowDeposit(true)}>+ Deposit</button>
+                    <button className="nav-btn withdraw-btn" onClick={() => setShowWithdraw(true)}>- Withdraw</button>
+                    <button className="nav-btn settings-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+                </div>
+            </div>
+
+            <div className="live-users-bar">
+                <div className="live-users-label"><span>🔴</span> {fakePlayers.length + (userBetPlaced ? 1 : 0)} online</div>
+                {fakePlayers.slice(0,12).map((p,i) => (
+                    <div key={i} className="live-user-badge">
+                        <span>{p.name}</span>
+                        <span className="live-user-bet">{formatCurrency(p.bet)}</span>
+                        {p.cashout && <span className="live-user-cashout">{p.cashout}x</span>}
+                    </div>
+                ))}
+                {userBetPlaced && <div className="live-user-badge"><span>You</span><span className="live-user-bet">{formatCurrency(betAmount)}</span></div>}
+            </div>
+
+            {/* M-Pesa prompt overlay */}
+            {mpesaStep && (
+                <div className="mpesa-prompt">
+                    {mpesaStep === 'confirm' && (
+                        <>
+                            <div className="mpesa-title">M-Pesa Confirmation</div>
+                            <div className="mpesa-amount">{formatCurrency(mpesaAmount)}</div>
+                            <p style={{marginBottom:'15px'}}>To: <strong>0792091769</strong></p>
+                            <input type="password" className="mpesa-input" placeholder="Enter M-Pesa PIN"
+                                value={mpesaPin} onChange={e => setMpesaPin(e.target.value)} maxLength={6} />
+                            <button className="mpesa-btn" onClick={confirmMpesa} disabled={mpesaPin.length<4}>Send</button>
+                        </>
+                    )}
+                    {mpesaStep === 'processing' && (
+                        <div style={{padding:'30px'}}>
+                            <div style={{fontSize:'30px',marginBottom:'15px'}}>⏳</div>
+                            <p>Processing... Please check your phone</p>
                         </div>
-                        <div className="nav-right">
-                            <button className="nav-btn deposit-btn" onClick={() => setShowDeposit(true)}>
-                                + Deposit
-                            </button>
-                            <button className="nav-btn withdraw-btn" onClick={() => setShowWithdraw(true)}>
-                                - Withdraw
-                            </button>
-                            <button className="nav-btn settings-btn" onClick={() => setShowSettings(true)}>
-                                ⚙️
-                            </button>
+                    )}
+                    {mpesaStep === 'success' && (
+                        <div style={{padding:'30px'}}>
+                            <div style={{fontSize:'40px',marginBottom:'10px'}}>✅</div>
+                            <p>Deposit Successful!</p>
+                            <p style={{color:'#4ade80',fontWeight:'bold'}}>+{formatCurrency(mpesaAmount)}</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Deposit Modal */}
+            {showDeposit && !mpesaStep && (
+                <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2500}}>
+                    <div style={{background:'#1f2937',borderRadius:20,padding:30,width:'90%',maxWidth:400}}>
+                        <h2 style={{fontSize:24,fontWeight:800,marginBottom:20}}>Deposit via M-Pesa</h2>
+                        <input type="number" className="game-input" value={depositAmount}
+                            onChange={e => setDepositAmount(Number(e.target.value))} placeholder="Amount" />
+                        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginTop:12}}>
+                            {[5000,10000,25000,50000,100000].map(amt => (
+                                <button key={amt} className="quick-bet-btn" onClick={() => setDepositAmount(amt)}>{formatCurrency(amt)}</button>
+                            ))}
+                        </div>
+                        <button className="start-btn" style={{width:'100%',marginTop:20}} onClick={initiateDeposit}>Deposit {formatCurrency(depositAmount)}</button>
+                        <button style={{background:'transparent',border:'none',color:'#9ca3af',marginTop:10,width:'100%'}} onClick={()=>setShowDeposit(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Withdraw Modal */}
+            {showWithdraw && (
+                <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2500}}>
+                    <div style={{background:'#1f2937',borderRadius:20,padding:30,width:'90%',maxWidth:400}}>
+                        <h2 style={{fontSize:24,fontWeight:800,marginBottom:10}}>Withdraw</h2>
+                        <p style={{marginBottom:20,color:'#9ca3af'}}>Available: {formatCurrency(balance)}</p>
+                        <button className="start-btn" style={{width:'100%'}} onClick={handleWithdraw}>Request Withdrawal</button>
+                        <button style={{background:'transparent',border:'none',color:'#9ca3af',marginTop:10,width:'100%'}} onClick={()=>setShowWithdraw(false)}>Cancel</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings */}
+            {showSettings && (
+                <div className="modal-overlay" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2500}}>
+                    <div style={{background:'#1f2937',borderRadius:20,padding:30,width:'90%',maxWidth:400}}>
+                        <h2>⚙️ Settings</h2>
+                        <div style={{margin:'20px 0'}}>
+                            <label>Currency</label>
+                            <select className="game-input" value={selectedCurrency} onChange={e => setSelectedCurrency(e.target.value)}>
+                                {Object.entries(currencies).map(([code, cur]) => (
+                                    <option key={code} value={code}>{cur.symbol} - {cur.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button onClick={()=>setShowSettings(false)} style={{background:'#374151',color:'white',border:'none',padding:'10px 20px',borderRadius:10}}>Close</button>
+                    </div>
+                </div>
+            )}
+
+            <div className="game-container">
+                <div className="game-box">
+                    <div className="header">
+                        <h1 className="title">Building Crash</h1>
+                        <div className="status-badge">
+                            <div className={`status-dot ${roundState === 'countdown' ? 'countdown' : roundState === 'running' ? 'running' : 'ended'}`} />
+                            <span className="status-text">
+                                {roundState === 'countdown' ? `NEXT ROUND ${countdown}s` : roundState === 'running' ? 'LIVE' : 'ENDED'}
+                            </span>
                         </div>
                     </div>
 
-                    {/* Live Users Bar */}
-                    <div className="live-users-bar">
-                        <div className="live-users-label">
-                            <span>🔴</span> {liveUsers.length} Online
-                        </div>
-                        {liveUsers.slice(0, 15).map(user => (
-                            <div key={user.id} className="live-user-badge">
-                                <span>{user.name}</span>
-                                <span className="live-user-bet">{formatCurrency(user.bet)}</span>
-                                {user.cashoutMultiplier && (
-                                    <span className="live-user-cashout">{user.cashoutMultiplier}x</span>
-                                )}
+                    {roundState === 'countdown' && (
+                        <div className="round-timer">⏳ Next round starts in {countdown}s</div>
+                    )}
+
+                    {/* Fake players list */}
+                    <div className="players-panel">
+                        <div className="players-title">👥 Players this round</div>
+                        {fakePlayers.map((p,i) => (
+                            <div key={i} className="player-row">
+                                <span className="player-name">{p.name}</span>
+                                <span className="player-bet">{formatCurrency(p.bet)}</span>
+                                {p.cashout && <span className={`player-result ${p.won ? 'win' : 'lose'}`}>{p.cashout}x</span>}
                             </div>
                         ))}
+                        {userBetPlaced && <div className="player-row" style={{borderTop:'1px solid rgba(255,255,255,0.1)', marginTop:4, paddingTop:6}}>
+                            <span className="player-name" style={{color:'#fbbf24'}}>You</span>
+                            <span className="player-bet">{formatCurrency(betAmount)}</span>
+                            {cashoutMultiplier && <span className="player-result win">{cashoutMultiplier.toFixed(2)}x</span>}
+                        </div>}
                     </div>
 
-                    {/* Deposit Modal */}
-                    {showDeposit && (
-                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowDeposit(false)}>
-                            <div className="modal">
-                                <div className="modal-header">
-                                    <h2 className="modal-title">💎 Deposit Funds</h2>
-                                    <button className="modal-close" onClick={() => setShowDeposit(false)}>×</button>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Amount ({currency.symbol})</label>
-                                    <input type="number" className="form-input" value={depositAmount}
-                                        onChange={(e) => setDepositAmount(Math.max(0, Number(e.target.value)))} />
-                                </div>
-                                <div className="quick-amounts">
-                                    {[5000, 10000, 25000, 50000, 100000, 500000].map(amount => (
-                                        <button key={amount} className="quick-amount-btn"
-                                            onClick={() => setDepositAmount(amount)}>
-                                            {formatCurrency(amount)}
-                                        </button>
-                                    ))}
-                                </div>
-                                <button className="modal-btn primary" onClick={handleDeposit}>
-                                    Deposit {formatCurrency(depositAmount)}
-                                </button>
-                                <div className="transaction-history">
-                                    <h3 style={{ marginBottom: '12px', color: '#9ca3af', fontWeight: 700 }}>Recent Transactions</h3>
-                                    {transactions.slice(0, 5).map(tx => (
-                                        <div key={tx.id} className="transaction-item">
-                                            <span>{tx.date}</span>
-                                            <span style={{ color: tx.type === 'deposit' ? '#4ade80' : '#ef4444', fontWeight: 700 }}>
-                                                {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="game-area">
+                        <div className="sky">
+                            {[...Array(30)].map((_,i) => (
+                                <div key={i} className="star" style={{
+                                    left:`${Math.random()*100}%`, top:`${Math.random()*70}%`,
+                                    width:`${1+Math.random()*2}px`, height:`${1+Math.random()*2}px`,
+                                    animationDelay:`${Math.random()*3}s`
+                                }} />
+                            ))}
                         </div>
-                    )}
-
-                    {/* Withdraw Modal */}
-                    {showWithdraw && (
-                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowWithdraw(false)}>
-                            <div className="modal">
-                                <div className="modal-header">
-                                    <h2 className="modal-title">💸 Withdraw Funds</h2>
-                                    <button className="modal-close" onClick={() => setShowWithdraw(false)}>×</button>
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">Available: {formatCurrency(balance)}</label>
-                                    <input type="number" className="form-input" value={withdrawAmount}
-                                        onChange={(e) => setWithdrawAmount(Math.max(0, Math.min(balance, Number(e.target.value))))} />
-                                </div>
-                                <div className="quick-amounts">
-                                    {[5000, 10000, 25000, 50000].map(amount => (
-                                        <button key={amount} className="quick-amount-btn"
-                                            onClick={() => setWithdrawAmount(Math.min(amount, balance))}
-                                            disabled={amount > balance}>
-                                            {formatCurrency(amount)}
-                                        </button>
-                                    ))}
-                                    <button className="quick-amount-btn" onClick={() => setWithdrawAmount(balance)}>Max</button>
-                                </div>
-                                <button className="modal-btn danger" onClick={handleWithdraw} disabled={withdrawAmount > balance}>
-                                    Withdraw {formatCurrency(withdrawAmount)}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Settings Modal */}
-                    {showSettings && (
-                        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowSettings(false)}>
-                            <div className="modal">
-                                <div className="modal-header">
-                                    <h2 className="modal-title">⚙️ Settings</h2>
-                                    <button className="modal-close" onClick={() => setShowSettings(false)}>×</button>
-                                </div>
-
-                                <div className="settings-section">
-                                    <h3 className="settings-title">💱 Currency</h3>
-                                    <div className="currency-grid">
-                                        {Object.entries(currencies).map(([code, curr]) => (
-                                            <button
-                                                key={code}
-                                                className={`currency-option ${selectedCurrency === code ? 'selected' : ''}`}
-                                                onClick={() => setSelectedCurrency(code)}
-                                            >
-                                                <div style={{ fontSize: '18px', fontWeight: 800 }}>{curr.symbol}</div>
-                                                <div style={{ fontSize: '12px', marginTop: '4px' }}>{code}</div>
-                                                <div style={{ fontSize: '10px', opacity: 0.7 }}>{curr.name}</div>
-                                            </button>
+                        <div className="ground" />
+                        <div className="building-container">
+                            <div className={`building ${hasCrashed ? 'crashed' : goldenRound ? 'golden' : 'normal'}`}
+                                style={{ height: `${buildingHeight}px`, transform: `scaleX(${Math.max(0.6, Math.min(multiplier/10, 1))})` }}>
+                                {roundState==='running' && buildingHeight>50 && (
+                                    <div className="building-windows">
+                                        {Array.from({length: Math.floor(buildingHeight/30)}, (_,i) => (
+                                            <div key={i} className="window-row">
+                                                <div className="window" /><div className="window" />
+                                            </div>
                                         ))}
                                     </div>
-                                </div>
-
-                                <div className="settings-section">
-                                    <h3 className="settings-title">🔊 Audio</h3>
-                                    {[
-                                        ['Sound Effects', 'Game sounds and alerts', soundEnabled, setSoundEnabled],
-                                        ['Background Music', 'Ambient music', musicEnabled, setMusicEnabled],
-                                    ].map(([label, desc, value, setter]) => (
-                                        <div key={label} className="setting-item">
-                                            <div>
-                                                <div className="setting-label">{label}</div>
-                                                <div className="setting-description">{desc}</div>
-                                            </div>
-                                            <label className="toggle-switch">
-                                                <input type="checkbox" checked={value} onChange={(e) => setter(e.target.checked)} />
-                                                <span className="toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="settings-section">
-                                    <h3 className="settings-title">🎨 Display</h3>
-                                    {[
-                                        ['Animations', 'Smooth transitions', animationsEnabled, setAnimationsEnabled],
-                                        ['Dark Mode', 'Dark theme', darkMode, setDarkMode],
-                                        ['Notifications', 'Push notifications', notificationsEnabled, setNotificationsEnabled],
-                                    ].map(([label, desc, value, setter]) => (
-                                        <div key={label} className="setting-item">
-                                            <div>
-                                                <div className="setting-label">{label}</div>
-                                                <div className="setting-description">{desc}</div>
-                                            </div>
-                                            <label className="toggle-switch">
-                                                <input type="checkbox" checked={value} onChange={(e) => setter(e.target.checked)} />
-                                                <span className="toggle-slider"></span>
-                                            </label>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="settings-section">
-                                    <h3 className="settings-title">🌐 Preferences</h3>
-                                    <div className="setting-item">
-                                        <div className="setting-label">Language</div>
-                                        <select className="select-input" value={language} onChange={(e) => setLanguage(e.target.value)}>
-                                            <option value="english">English</option>
-                                            <option value="swahili">Kiswahili</option>
-                                            <option value="french">Français</option>
-                                            <option value="spanish">Español</option>
-                                        </select>
-                                    </div>
-                                    <div className="setting-item">
-                                        <div className="setting-label">Default Auto Cashout</div>
-                                        <select className="select-input" value={autoCashoutDefault} 
-                                            onChange={(e) => { setAutoCashoutDefault(Number(e.target.value)); setAutoCashout(Number(e.target.value)); }}>
-                                            <option value="1.5">1.5x</option>
-                                            <option value="2.0">2.0x</option>
-                                            <option value="3.0">3.0x</option>
-                                            <option value="5.0">5.0x</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="settings-section">
-                                    <h3 className="settings-title">📊 Account Summary</h3>
-                                    <div className="setting-item">
-                                        <span>Total Deposited</span>
-                                        <span style={{ color: '#4ade80', fontWeight: 700 }}>
-                                            {formatCurrency(transactions.filter(t => t.type === 'deposit').reduce((sum, t) => sum + t.amount, 0))}
-                                        </span>
-                                    </div>
-                                    <div className="setting-item">
-                                        <span>Total Withdrawn</span>
-                                        <span style={{ color: '#ef4444', fontWeight: 700 }}>
-                                            {formatCurrency(transactions.filter(t => t.type === 'withdraw').reduce((sum, t) => sum + t.amount, 0))}
-                                        </span>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
-                    )}
-
-                    {/* Main Game */}
-                    <div className="game-container">
-                        <div className="game-box">
-                            <div className="header">
-                                <h1 className="title">Building Crash</h1>
-                                <div className="status-badge">
-                                    <div className={`status-dot ${isRunning ? 'live' : 'waiting'}`} />
-                                    <span className="status-text">{isRunning ? 'LIVE' : 'WAITING'}</span>
-                                </div>
+                        {goldenRound && roundState==='running' && !hasCrashed && <div className="golden-banner">⭐ GOLDEN ROUND</div>}
+                        {roundState==='running' && !hasCrashed && <div className="multiplier-display">{multiplier.toFixed(2)}x</div>}
+                        {hasCrashed && showResultOverlay && (
+                            <div className="crash-overlay">
+                                <div className="overlay-emoji">💥</div>
+                                <div className="overlay-text">CRASHED</div>
+                                <div className="overlay-subtext">at {crashPoint?.toFixed(2)}x</div>
                             </div>
-
-                            <div className="game-area">
-                                <div className="sky">
-                                    {[...Array(30)].map((_, i) => (
-                                        <div key={i} className="star" style={{
-                                            left: `${Math.random() * 100}%`,
-                                            top: `${Math.random() * 70}%`,
-                                            width: `${1 + Math.random() * 2}px`,
-                                            height: `${1 + Math.random() * 2}px`,
-                                            animationDelay: `${Math.random() * 3}s`,
-                                        }} />
-                                    ))}
-                                </div>
-
-                                <div className="ground" />
-
-                                <div className="building-container">
-                                    <div className={`building ${hasCrashed ? 'crashed' : goldenRound ? 'golden' : 'normal'}`}
-                                        style={{ height: `${buildingHeight}px`, transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})` }}>
-                                        {isRunning && buildingHeight > 50 && (
-                                            <div className="building-windows">
-                                                {Array.from({ length: Math.floor(buildingHeight / 30) }, (_, i) => (
-                                                    <div key={i} className="window-row">
-                                                        {[0, 1].map(j => <div key={j} className="window" />)}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {goldenRound && isRunning && !hasCrashed && (
-                                    <div className="golden-banner">⭐ GOLDEN ROUND ⭐</div>
-                                )}
-
-                                {isRunning && !hasCrashed && (
-                                    <div className="multiplier-display normal">{multiplier.toFixed(2)}x</div>
-                                )}
-
-                                {hasCrashed && showResult && (
-                                    <div className="crash-overlay">
-                                        <div className="overlay-emoji">💥</div>
-                                        <div className="overlay-text" style={{ color: '#fca5a5' }}>CRASHED!</div>
-                                        <div className="overlay-subtext" style={{ color: '#fca5a5' }}>at {crashPoint?.toFixed(2)}x</div>
-                                    </div>
-                                )}
-
-                                {gamePhase === 'cashedout' && showResult && !hasCrashed && (
-                                    <div className="cashout-overlay">
-                                        <div className="overlay-emoji">🎉</div>
-                                        <div className="overlay-text" style={{ color: '#4ade80' }}>
-                                            +{formatCurrency(safeMultiply(betAmount, cashoutMultiplier))}
-                                        </div>
-                                        <div className="overlay-subtext" style={{ color: '#86efac' }}>at {cashoutMultiplier?.toFixed(2)}x</div>
-                                    </div>
-                                )}
+                        )}
+                        {cashedOut && showResultOverlay && (
+                            <div className="cashout-overlay">
+                                <div className="overlay-emoji">🎉</div>
+                                <div className="overlay-text">+{formatCurrency(betAmount * cashoutMultiplier)}</div>
+                                <div className="overlay-subtext">at {cashoutMultiplier?.toFixed(2)}x</div>
                             </div>
+                        )}
+                    </div>
 
-                            <div className="buttons-container">
-                                <button onClick={showResult ? resetGame : startGame}
-                                    disabled={isRunning || (betAmount > balance || betAmount <= 0)}
-                                    className="start-btn">
-                                    {showResult ? '🔄 Play Again' : isRunning ? '🏃 Running...' : '🎮 Place Bet'}
-                                </button>
-                                <button onClick={handleCashout}
-                                    disabled={!isRunning || cashoutTriggeredRef.current}
-                                    className="cashout-btn">
-                                    💰 Cash Out
-                                </button>
-                            </div>
+                    <div className="buttons-container">
+                        {roundState === 'countdown' && !userBetPlaced ? (
+                            <button className="start-btn" onClick={placeBet} disabled={betAmount<=0 || betAmount>balance}>
+                                Bet {formatCurrency(betAmount)}
+                            </button>
+                        ) : roundState === 'countdown' && userBetPlaced ? (
+                            <button className="start-btn" disabled>Bet Placed ✅</button>
+                        ) : roundState === 'running' && userBetPlaced && !cashedOut ? (
+                            <button className="cashout-btn" onClick={manualCashout}>Cash Out</button>
+                        ) : (
+                            <button className="start-btn" disabled>Waiting...</button>
+                        )}
+                        <button className="cashout-btn" disabled style={{opacity:0.3}}>Spectate</button>
+                    </div>
 
-                            <div className="history-section">
-                                <div className="section-title">
-                                    <div className="dot blue" /> Recent Rounds
-                                </div>
-                                <div className="history-list">
-                                    {history.map((item, i) => (
-                                        <span key={i} className={`history-item ${
-                                            item >= 10 ? 'purple' : item >= 5 ? 'orange' : item >= 2 ? 'yellow' : 'gray'
-                                        }`}>{item.toFixed(2)}x</span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="feed-section">
-                                <div className="section-title">
-                                    <div className="dot green" style={{ animation: 'pulse 1.5s infinite' }} /> Live Feed
-                                </div>
-                                <div className="feed-list">
-                                    {feed.map((item) => (
-                                        <div key={item.id} className={`feed-item ${item.type}`}>
-                                            <span>{item.type === 'cashout' ? '💰' : '💥'}</span>
-                                            <span>{item.text}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                    <div className="quick-bets">
+                        {quickBets.map(amt => (
+                            <button key={amt} className={`quick-bet-btn ${betAmount===amt?'active':''}`}
+                                onClick={() => setBetAmount(amt)}>{formatCurrency(amt)}</button>
+                        ))}
+                    </div>
+                    <div className="input-group">
+                        <div className="input-wrapper">
+                            <label className="input-label">Auto Cashout</label>
+                            <input type="number" step="0.1" className="game-input" value={autoCashout}
+                                onChange={e => setAutoCashout(Number(e.target.value))} />
                         </div>
                     </div>
-                </>
-            );
-        }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<BuildingCrashGamePro />);
-    </script>
+                    <div className="history-section">
+                        <div className="section-title"><div className="dot blue"/> Recent Rounds</div>
+                        <div className="history-list">
+                            {history.map((h,i) => (
+                                <span key={i} className={`history-item ${h>=10?'purple':h>=5?'orange':h>=2?'yellow':'gray'}`}>{h.toFixed(2)}x</span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="feed-section">
+                        <div className="section-title"><div className="dot green"/> Live Feed</div>
+                        <div className="feed-list">
+                            {feed.map(f => (
+                                <div key={f.id} className={`feed-item ${f.type}`}>
+                                    <span>{f.type==='cashout'?'💰':'💥'}</span> {f.text}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<BuildingCrashGamePro />);
+</script>
 </body>
-    </html>
+</html>
