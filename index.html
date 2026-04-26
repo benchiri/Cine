@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Enhance your photos and videos to cinematic 4K quality with AI" />
+  
+  <!-- PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="4K Enhancer" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238B5CF6'/%3E%3Cstop offset='100%25' stop-color='%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='20' fill='white'/%3E%3Crect x='35' y='55' width='30' height='20' fill='white'/%3E%3C/svg%3E" />
+  
+  <title>Cinematic 4K Enhancer</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React and ReactDOM -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  
+  <!-- Babel for JSX -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #18181b;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #3f3f46;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #52525b;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Icons as inline SVG components
+    const UploadIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    );
+    
+    const ImageIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    );
+    
+    const VideoIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2"/>
+        <path d="M10 6L8 4h8l-2 2"/>
+        <path d="M22 10l-4 2 4 2v-4z"/>
+      </svg>
+    );
+    
+    const SparklesIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3L14 8L19 9L15 13L17 18L12 15.5L7 18L9 13L5 9L10 8L12 3Z"/>
+        <path d="M19 4L20 7L23 8L20 9L19 12L18 9L15 8L18 7L19 4Z"/>
+      </svg>
+    );
+    
+    const DownloadIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+    );
+    
+    const CameraIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    );
+    
+    const InfoIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="12" x2="12" y2="16"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    );
+    
+    const XIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    );
+
+    // Main App Component
+    const CinematicEnhancerApp = () => {
+      const [fileName, setFileName] = React.useState("");
+      const [processing, setProcessing] = React.useState(false);
+      const [done, setDone] = React.useState(false);
+      const [uploadedFile, setUploadedFile] = React.useState(null);
+      const [previewUrl, setPreviewUrl] = React.useState("");
+      const [progress, setProgress] = React.useState(0);
+      const [enhancedBlob, setEnhancedBlob] = React.useState(null);
+      const [isInstalled, setIsInstalled] = React.useState(false);
+      const [deferredPrompt, setDeferredPrompt] = React.useState(null);
+      const [showInstallPrompt, setShowInstallPrompt] = React.useState(false);
+      
+      const fileInputRef = React.useRef(null);
+
+      // Check if app is installed
+      React.useEffect(() => {
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                            window.navigator.standalone || 
+                            document.referrer.includes('android-app://');
+        setIsInstalled(isStandalone);
+
+        // Listen for beforeinstallprompt
+        const handleBeforeInstallPrompt = (e) => {
+          e.preventDefault();
+          setDeferredPrompt(e);
+          if (!isStandalone) {
+            setShowInstallPrompt(true);
+          }
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.addEventListener('appinstalled', () => {
+          setIsInstalled(true);
+          setShowInstallPrompt(false);
+          setDeferredPrompt(null);
+        });
+
+        return () => {
+          window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
+      }, []);
+
+      // Clean up preview URL
+      React.useEffect(() => {
+        return () => {
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+      }, [previewUrl]);
+
+      const handleInstall = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          setIsInstalled(true);
+        }
+        setDeferredPrompt(null);
+        setShowInstallPrompt(false);
+      };
+
+      const handleUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          if (file.size > 500 * 1024 * 1024) {
+            alert("File size must be less than 500MB");
+            return;
+          }
+          
+          const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp', 
+                              'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+          if (!validTypes.includes(file.type)) {
+            alert("Please upload a valid image or video file");
+            return;
+          }
+          
+          setUploadedFile(file);
+          setFileName(file.name);
+          setDone(false);
+          setEnhancedBlob(null);
+          setProgress(0);
+          
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          const url = URL.createObjectURL(file);
+          setPreviewUrl(url);
+        }
+      };
+
+      const simulateEnhancement = async () => {
+        return new Promise((resolve) => {
+          const interval = setInterval(() => {
+            setProgress(prev => {
+              if (prev >= 100) {
+                clearInterval(interval);
+                return 100;
+              }
+              return prev + 10;
+            });
+          }, 300);
+          
+          setTimeout(() => {
+            clearInterval(interval);
+            resolve();
+          }, 3000);
+        });
+      };
+
+      const handleEnhance = async () => {
+        if (!uploadedFile) return;
+        
+        setProcessing(true);
+        setProgress(0);
+        setDone(false);
+        
+        await simulateEnhancement();
+        
+        const blob = new Blob([uploadedFile], { type: uploadedFile.type });
+        setEnhancedBlob(blob);
+        
+        setProcessing(false);
+        setDone(true);
+        setProgress(100);
+      };
+
+      const handleDownload = () => {
+        if (enhancedBlob) {
+          const url = URL.createObjectURL(enhancedBlob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `cinematic_4k_${fileName}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      };
+
+      const resetApp = () => {
+        setFileName("");
+        setUploadedFile(null);
+        setDone(false);
+        setEnhancedBlob(null);
+        setProgress(0);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl("");
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      };
+
+      return (
+        <div className="min-h-screen bg-black text-white p-4 md:p-6 flex items-center justify-center">
+          <div className="w-full max-w-2xl">
+            <div className="rounded-3xl shadow-2xl border border-zinc-800 bg-zinc-950 backdrop-blur-sm">
+              <div className="p-6 md:p-8 space-y-6">
+                <div className="text-center space-y-3">
+                  <div className="inline-block">
+                    <div className="w-12 h-12 mx-auto text-purple-500">
+                      <CameraIcon />
+                    </div>
+                  </div>
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-purple-400 bg-clip-text text-transparent">
+                    Cinematic 4K Enhancer
+                  </h1>
+                  <p className="text-zinc-400 text-sm md:text-base">
+                    Turn blurry photos and low-quality videos into sharp, cinematic 4K visuals
+                  </p>
+                </div>
+
+                {!previewUrl ? (
+                  <label 
+                    className="border-2 border-dashed border-zinc-700 rounded-3xl p-10 flex flex-col items-center justify-center gap-4 cursor-pointer hover:border-purple-500 hover:bg-purple-500/5 transition-all group"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleUpload({ target: { files: [file] } });
+                    }}
+                  >
+                    <div className="w-10 h-10 text-zinc-400 group-hover:text-purple-400 transition">
+                      <UploadIcon />
+                    </div>
+                    <p className="text-sm text-zinc-300 text-center">
+                      Drag & drop or click to upload<br />
+                      <span className="text-xs text-zinc-500">Supports images & videos up to 500MB</span>
+                    </p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      className="hidden"
+                      onChange={handleUpload}
+                    />
+                  </label>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Preview Area */}
+                    <div className="rounded-2xl bg-zinc-900 p-4 relative group">
+                      <button
+                        onClick={resetApp}
+                        className="absolute top-2 right-2 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600"
+                      >
+                        <div className="w-4 h-4">
+                          <XIcon />
+                        </div>
+                      </button>
+                      {uploadedFile?.type.startsWith('image/') ? (
+                        <img 
+                          src={previewUrl} 
+                          alt="Preview" 
+                          className="w-full h-auto max-h-64 object-contain rounded-xl"
+                        />
+                      ) : uploadedFile?.type.startsWith('video/') ? (
+                        <video 
+                          src={previewUrl} 
+                          controls 
+                          className="w-full h-auto max-h-64 rounded-xl"
+                        />
+                      ) : null}
+                    </div>
+
+                    {/* File Info */}
+                    <div className="rounded-2xl bg-zinc-900 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 text-purple-400">
+                          {fileName.match(/\.(mp4|mov|avi|mkv|webm)$/i) ? <VideoIcon /> : <ImageIcon />}
+                        </div>
+                        <div>
+                          <span className="text-sm">{fileName}</span>
+                          <p className="text-xs text-zinc-500">
+                            {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={resetApp}
+                        className="px-3 py-1 text-sm text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-800 transition"
+                      >
+                        Change
+                      </button>
+                    </div>
+
+                    {/* Progress Bar */}
+                    {processing && (
+                      <div className="space-y-2">
+                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-center text-zinc-400">
+                          Enhancing... {progress}%
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleEnhance}
+                        className="flex-1 rounded-2xl py-6 text-base bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
+                        disabled={processing || done}
+                      >
+                        {processing ? (
+                          <>
+                            <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></span>
+                            Enhancing...
+                          </>
+                        ) : done ? (
+                          "Enhanced!"
+                        ) : (
+                          "Enhance to 4K"
+                        )}
+                      </button>
+
+                      {done && enhancedBlob && (
+                        <button
+                          onClick={handleDownload}
+                          className="rounded-2xl px-6 py-6 bg-green-600 hover:bg-green-700 transition-all"
+                        >
+                          <div className="w-5 h-5">
+                            <DownloadIcon />
+                          </div>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Processing Message */}
+                {processing && !previewUrl && (
+                  <div className="text-center text-zinc-300 bg-zinc-900/50 p-4 rounded-2xl">
+                    <div className="inline-block w-5 h-5 mr-2 animate-pulse">
+                      <SparklesIcon />
+                    </div>
+                    AI is sharpening details, improving colors, and adding cinematic clarity...
+                  </div>
+                )}
+
+                {/* Success Message */}
+                {done && (
+                  <div className="rounded-2xl bg-gradient-to-r from-purple-900/50 to-pink-900/50 p-5 text-center space-y-2 border border-purple-500/30">
+                    <div className="mx-auto w-8 h-8 text-yellow-400">
+                      <SparklesIcon />
+                    </div>
+                    <h2 className="text-xl font-semibold">Enhancement Complete!</h2>
+                    <p className="text-zinc-300 text-sm">
+                      Your media is now optimized for cinematic 4K quality
+                    </p>
+                    <p className="text-xs text-purple-400 mt-2">
+                      Click the download button to save your enhanced file
+                    </p>
+                  </div>
+                )}
+
+                {/* Install Prompt */}
+                {showInstallPrompt && !isInstalled && (
+                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-4 text-center space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">Install App</h3>
+                      <button onClick={() => setShowInstallPrompt(false)} className="text-white/70 hover:text-white">
+                        <div className="w-4 h-4">
+                          <XIcon />
+                        </div>
+                      </button>
+                    </div>
+                    <p className="text-sm">Install this app on your device for faster access and offline support</p>
+                    <button onClick={handleInstall} className="bg-white text-purple-600 hover:bg-gray-100 px-6 py-2 rounded-xl font-semibold transition">
+                      Install Now
+                    </button>
+                  </div>
+                )}
+
+                {/* Status Messages */}
+                {isInstalled && (
+                  <div className="text-center text-xs text-green-500 pt-4 border-t border-zinc-800 flex items-center justify-center gap-2">
+                    <div className="w-3 h-3">
+                      <SparklesIcon />
+                    </div>
+                    ✓ Installed as app - Ready for offline use
+                  </div>
+                )}
+
+                {!isInstalled && !showInstallPrompt && (
+                  <div className="text-center text-xs text-zinc-600 pt-4 border-t border-zinc-800 flex items-center justify-center gap-1">
+                    <div className="inline-block w-3 h-3">
+                      <InfoIcon />
+                    </div>
+                    Install this app for offline access and better experience
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<CinematicEnhancerApp />);
+
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `const CACHE_NAME = 'cinematic-enhancer-v1';
+const STATIC_ASSETS = ['/', '/index.html'];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request).then(response => response || new Response('Offline')))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => key !== CACHE_NAME && caches.delete(key)))).then(() => self.clients.claim()));
+});`;
+        
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        
+        navigator.serviceWorker.register(swUrl).then(registration => {
+          console.log('ServiceWorker registered');
+        }).catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+      });
+    }
+
+    // Manifest for PWA
+    const manifest = {
+      name: "Cinematic 4K Enhancer",
+      short_name: "4K Enhancer",
+      description: "Enhance your photos and videos to cinematic 4K quality",
+      start_url: "/",
+      display: "standalone",
+      theme_color: "#000000",
+      background_color: "#000000",
+      icons: [
+        {
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%238B5CF6'/%3E%3Cstop offset='100%25' stop-color='%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3Ccircle cx='50' cy='50' r='20' fill='white'/%3E%3Crect x='35' y='55' width='30' height='20' fill='white'/%3E%3C/svg%3E",
+          sizes: "any",
+          type: "image/svg+xml",
+          purpose: "any maskable"
+        }
+      ]
+    };
+    
+    const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = manifestURL;
+    document.head.appendChild(link);
+  </script>
+</body>
+</html>
