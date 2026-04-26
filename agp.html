@@ -1,505 +1,963 @@
-.game-container {
-  min-height: 100vh;
-  background: linear-gradient(to bottom, #0a0a0a, #000000);
-  color: white;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: Arial, sans-serif;
-}
-
-.game-box {
-  width: 100%;
-  max-width: 500px;
-  background: rgba(17, 24, 39, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 24px;
-  padding: 24px;
-  border: 1px solid #374151;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.live {
-  background: #4ade80;
-  box-shadow: 0 0 10px #4ade80;
-}
-
-.status-dot.waiting {
-  background: #6b7280;
-}
-
-.status-text {
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-.balance-box {
-  background: rgba(31, 41, 55, 0.5);
-  border-radius: 16px;
-  padding: 16px;
-  border: 1px solid #374151;
-  margin-bottom: 20px;
-}
-
-.balance-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.balance-label {
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-.balance-amount {
-  font-size: 28px;
-  font-weight: bold;
-  color: #4ade80;
-}
-
-.profit-message {
-  text-align: center;
-  color: #4ade80;
-  font-weight: bold;
-  margin-top: 8px;
-}
-
-.loss-message {
-  text-align: center;
-  color: #ef4444;
-  font-weight: bold;
-  margin-top: 8px;
-}
-
-.quick-bets {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.quick-bet-btn {
-  padding: 6px;
-  border-radius: 8px;
-  border: none;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  color: #9ca3af;
-  background: #1f2937;
-}
-
-.quick-bet-btn.active {
-  background: #2563eb;
-  color: white;
-}
-
-.quick-bet-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.input-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.input-wrapper {
-  position: relative;
-}
-
-.input-label {
-  color: #9ca3af;
-  font-size: 12px;
-  margin-bottom: 6px;
-  display: block;
-}
-
-.game-input {
-  width: 100%;
-  padding: 10px 12px;
-  background: #1f2937;
-  border: 1px solid #374151;
-  border-radius: 12px;
-  color: white;
-  font-size: 14px;
-  outline: none;
-  box-sizing: border-box;
-}
-
-.game-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.game-area {
-  position: relative;
-  background: rgba(31, 41, 55, 0.5);
-  border-radius: 16px;
-  height: 400px;
-  overflow: hidden;
-  border: 1px solid #374151;
-  margin-bottom: 20px;
-}
-
-.sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, #111827, #1f2937, #111827);
-}
-
-.star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: white;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.ground {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 64px;
-  background: linear-gradient(to top, #374151, #4b5563);
-}
-
-.ground-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #6b7280;
-}
-
-.building-container {
-  position: absolute;
-  bottom: 64px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.building {
-  width: 100px;
-  border-radius: 8px 8px 0 0;
-  max-height: 370px;
-  background: linear-gradient(to top, #2563eb, #60a5fa);
-  transition: height 0.1s linear;
-  transform-origin: bottom center;
-}
-
-.building.crashed {
-  background: linear-gradient(to top, #dc2626, #f87171);
-}
-
-.building.golden {
-  background: linear-gradient(to top, #d97706, #fbbf24);
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
-}
-
-.golden-banner {
-  position: absolute;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(to right, #d97706, #fbbf24);
-  color: black;
-  padding: 4px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 14px;
-  animation: bounce 1s infinite;
-}
-
-.multiplier-display {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 60px;
-  font-weight: 900;
-  color: #fbbf24;
-}
-
-.crash-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(185, 28, 28, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.crash-emoji {
-  font-size: 60px;
-}
-
-.crash-text {
-  font-size: 40px;
-  font-weight: 900;
-  color: #fca5a5;
-  animation: bounce 1s infinite;
-}
-
-.crash-point {
-  font-size: 20px;
-  color: #fca5a5;
-  margin-top: 8px;
-}
-
-.cashout-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(22, 163, 74, 0.4);
-  backdrop-filter: blur(4px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.cashout-emoji {
-  font-size: 60px;
-}
-
-.cashout-amount {
-  font-size: 40px;
-  font-weight: 900;
-  color: #4ade80;
-}
-
-.cashout-multiplier {
-  font-size: 20px;
-  color: #4ade80;
-  margin-top: 8px;
-}
-
-.buttons-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.start-btn {
-  padding: 12px;
-  border-radius: 16px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #059669;
-  color: white;
-  transition: all 0.2s;
-}
-
-.start-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.start-btn:not(:disabled):hover {
-  opacity: 0.9;
-}
-
-.cashout-btn {
-  padding: 12px;
-  border-radius: 16px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: linear-gradient(to right, #f59e0b, #f97316);
-  color: black;
-  transition: all 0.2s;
-}
-
-.cashout-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.cashout-btn:not(:disabled):hover {
-  opacity: 0.9;
-}
-
-.history-section {
-  margin-bottom: 20px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.dot.blue {
-  background: #60a5fa;
-}
-
-.dot.green {
-  background: #4ade80;
-}
-
-.dot.pulse {
-  animation: pulse 1s infinite;
-}
-
-.history-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.history-item {
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid #4b5563;
-}
-
-.history-item.purple {
-  background: rgba(88, 28, 135, 0.5);
-  color: #c084fc;
-}
-
-.history-item.orange {
-  background: rgba(154, 52, 18, 0.5);
-  color: #fb923c;
-}
-
-.history-item.yellow {
-  background: rgba(113, 63, 18, 0.5);
-  color: #fbbf24;
-}
-
-.history-item.gray {
-  background: #374151;
-  color: #9ca3af;
-}
-
-.feed-section {
-  margin-top: 10px;
-}
-
-.feed-list {
-  max-height: 150px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
-.feed-list::-webkit-scrollbar {
-  width: 4px;
-}
-
-.feed-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.feed-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.feed-item {
-  padding: 8px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid;
-}
-
-.feed-item.cashout {
-  background: rgba(22, 163, 74, 0.1);
-  border-color: rgba(22, 163, 74, 0.3);
-}
-
-.feed-item.crash {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.3);
-}
-
-.feed-item.info {
-  background: rgba(31, 41, 55, 0.5);
-  border-color: #374151;
-}
-
-.feed-icon {
-  font-size: 16px;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Crash Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+        }
+
+        .game-container {
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #0a0a0a, #000000);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-box {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid #374151;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.live {
+            background: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+
+        .status-dot.waiting {
+            background: #6b7280;
+        }
+
+        .status-text {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .balance-box {
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #374151;
+            margin-bottom: 20px;
+        }
+
+        .balance-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .balance-label {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .profit-message {
+            text-align: center;
+            color: #4ade80;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .loss-message {
+            text-align: center;
+            color: #ef4444;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .quick-bets {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .quick-bet-btn {
+            padding: 6px;
+            border-radius: 8px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #9ca3af;
+            background: #1f2937;
+        }
+
+        .quick-bet-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .quick-bet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-label {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .game-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .game-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .game-area {
+            position: relative;
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 16px;
+            height: 400px;
+            overflow: hidden;
+            border: 1px solid #374151;
+            margin-bottom: 20px;
+        }
+
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, #111827, #1f2937, #111827);
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 64px;
+            background: linear-gradient(to top, #374151, #4b5563);
+        }
+
+        .ground-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #6b7280;
+        }
+
+        .building-container {
+            position: absolute;
+            bottom: 64px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .building {
+            width: 100px;
+            border-radius: 8px 8px 0 0;
+            max-height: 370px;
+            background: linear-gradient(to top, #2563eb, #60a5fa);
+            transition: height 0.1s linear;
+            transform-origin: bottom center;
+        }
+
+        .building.crashed {
+            background: linear-gradient(to top, #dc2626, #f87171);
+        }
+
+        .building.golden {
+            background: linear-gradient(to top, #d97706, #fbbf24);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .golden-banner {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #d97706, #fbbf24);
+            color: black;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            animation: bounce 1s infinite;
+        }
+
+        .multiplier-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: 900;
+            color: #fbbf24;
+        }
+
+        .crash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(185, 28, 28, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .crash-emoji {
+            font-size: 60px;
+        }
+
+        .crash-text {
+            font-size: 40px;
+            font-weight: 900;
+            color: #fca5a5;
+            animation: bounce 1s infinite;
+        }
+
+        .crash-point {
+            font-size: 20px;
+            color: #fca5a5;
+            margin-top: 8px;
+        }
+
+        .cashout-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(22, 163, 74, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cashout-emoji {
+            font-size: 60px;
+        }
+
+        .cashout-amount {
+            font-size: 40px;
+            font-weight: 900;
+            color: #4ade80;
+        }
+
+        .cashout-multiplier {
+            font-size: 20px;
+            color: #4ade80;
+            margin-top: 8px;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            padding: 12px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #059669;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .start-btn:not(:disabled):hover {
+            background: #047857;
+        }
+
+        .cashout-btn {
+            padding: 12px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(to right, #f59e0b, #f97316);
+            color: black;
+            transition: all 0.2s;
+        }
+
+        .cashout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cashout-btn:not(:disabled):hover {
+            background: linear-gradient(to right, #d97706, #ea580c);
+        }
+
+        .history-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot.blue {
+            background: #60a5fa;
+        }
+
+        .dot.green {
+            background: #4ade80;
+        }
+
+        .dot.pulse {
+            animation: pulse 1s infinite;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .history-item {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid #4b5563;
+        }
+
+        .history-item.purple {
+            background: rgba(88, 28, 135, 0.5);
+            color: #c084fc;
+        }
+
+        .history-item.orange {
+            background: rgba(154, 52, 18, 0.5);
+            color: #fb923c;
+        }
+
+        .history-item.yellow {
+            background: rgba(113, 63, 18, 0.5);
+            color: #fbbf24;
+        }
+
+        .history-item.gray {
+            background: #374151;
+            color: #9ca3af;
+        }
+
+        .feed-section {
+            margin-top: 10px;
+        }
+
+        .feed-list {
+            max-height: 150px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .feed-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .feed-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .feed-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .feed-item {
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid;
+        }
+
+        .feed-item.cashout {
+            background: rgba(22, 163, 74, 0.1);
+            border-color: rgba(22, 163, 74, 0.3);
+        }
+
+        .feed-item.crash {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .feed-item.info {
+            background: rgba(31, 41, 55, 0.5);
+            border-color: #374151;
+        }
+
+        .feed-icon {
+            font-size: 16px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+            20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        function BuildingCrashGamePro() {
+            const [balance, setBalance] = useState(1000);
+            const [betAmount, setBetAmount] = useState(100);
+            const [autoCashout, setAutoCashout] = useState(2.0);
+            const [multiplier, setMultiplier] = useState(1.0);
+            const [isRunning, setIsRunning] = useState(false);
+            const [hasCrashed, setHasCrashed] = useState(false);
+            const [cashoutMultiplier, setCashoutMultiplier] = useState(null);
+            const [crashPoint, setCrashPoint] = useState(null);
+            const [goldenRound, setGoldenRound] = useState(false);
+            const [gamePhase, setGamePhase] = useState('idle');
+            const [showResult, setShowResult] = useState(false);
+            const [history, setHistory] = useState([1.45, 2.33, 5.21, 1.12, 3.45, 1.89, 2.67, 4.21]);
+            const [feed, setFeed] = useState([
+                { id: 1, text: "Player won 2.45x - $245", type: "cashout" },
+                { id: 2, text: "Player lost at 1.21x", type: "crash" },
+                { id: 3, text: "Player won 4.10x - $820", type: "cashout" },
+            ]);
+
+            const intervalRef = useRef(null);
+            const currentMultiplierRef = useRef(1.0);
+            const gameActiveRef = useRef(false);
+            const betAmountRef = useRef(100);
+            const autoCashoutRef = useRef(2.0);
+            const cashoutTriggeredRef = useRef(false);
+            const consecutiveLossesRef = useRef(0);
+            const playerLifetimeProfitRef = useRef(0);
+
+            useEffect(() => {
+                return () => {
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                    }
+                };
+            }, []);
+
+            useEffect(() => {
+                betAmountRef.current = betAmount;
+            }, [betAmount]);
+
+            useEffect(() => {
+                autoCashoutRef.current = autoCashout;
+            }, [autoCashout]);
+
+            const safeMultiply = useCallback((a, b) => {
+                return Math.round((a * b) * 100) / 100;
+            }, []);
+
+            const generateCrashPoint = useCallback(() => {
+                const betSize = betAmountRef.current;
+                const totalBalance = balance;
+                const betPercentage = betSize / totalBalance;
+                
+                let houseEdgeMultiplier = 1.0;
+                
+                if (betSize > 200) houseEdgeMultiplier *= 0.85;
+                if (betSize > 500) houseEdgeMultiplier *= 0.75;
+                if (betSize > 1000) houseEdgeMultiplier *= 0.65;
+                
+                if (betPercentage > 0.2) houseEdgeMultiplier *= 0.9;
+                if (betPercentage > 0.4) houseEdgeMultiplier *= 0.8;
+                if (betPercentage > 0.6) houseEdgeMultiplier *= 0.7;
+                
+                if (playerLifetimeProfitRef.current > 500) houseEdgeMultiplier *= 0.9;
+                if (playerLifetimeProfitRef.current > 1000) houseEdgeMultiplier *= 0.85;
+                if (playerLifetimeProfitRef.current > 2000) houseEdgeMultiplier *= 0.8;
+                
+                if (consecutiveLossesRef.current > 3) houseEdgeMultiplier *= 1.15;
+                if (consecutiveLossesRef.current > 5) houseEdgeMultiplier *= 1.25;
+                
+                const randomFactor = 0.85 + (Math.random() * 0.3);
+                const basePoint = Math.max(1.1, (1 / (1 - Math.random())) * 0.97);
+                const adjustedPoint = basePoint * houseEdgeMultiplier * randomFactor;
+                
+                const goldenChance = Math.max(0.02, 0.12 * (1 - betPercentage));
+                const isGolden = Math.random() < goldenChance;
+                
+                let finalPoint;
+                if (isGolden) {
+                    const goldenMax = Math.max(5, 50 * (1 - betPercentage));
+                    finalPoint = 10 + Math.random() * goldenMax;
+                } else {
+                    const maxMultiplier = Math.max(3, 10 * (1 - betPercentage * 0.5));
+                    finalPoint = Math.min(adjustedPoint, maxMultiplier);
+                }
+                
+                finalPoint = Math.max(1.1, finalPoint);
+                
+                if (betSize > 500 && Math.random() < 0.15) {
+                    finalPoint = Math.min(finalPoint, 1.15 + Math.random() * 0.3);
+                }
+                
+                return {
+                    point: Math.round(finalPoint * 100) / 100,
+                    isGolden
+                };
+            }, [balance]);
+
+            const startGame = useCallback(() => {
+                if (gameActiveRef.current || isRunning) return;
+                if (betAmount <= 0 || betAmount > balance) {
+                    alert(betAmount <= 0 ? "Please enter a bet amount" : "Insufficient balance!");
+                    return;
+                }
+
+                const { point, isGolden } = generateCrashPoint();
+                
+                currentMultiplierRef.current = 1.0;
+                cashoutTriggeredRef.current = false;
+                gameActiveRef.current = true;
+                
+                setCrashPoint(point);
+                setGoldenRound(isGolden);
+                setBalance(prev => prev - betAmount);
+                setMultiplier(1.0);
+                setCashoutMultiplier(null);
+                setHasCrashed(false);
+                setIsRunning(true);
+                setGamePhase('running');
+                setShowResult(false);
+
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                }
+
+                intervalRef.current = setInterval(() => {
+                    if (!gameActiveRef.current) {
+                        clearInterval(intervalRef.current);
+                        return;
+                    }
+
+                    const newMultiplier = Math.round((currentMultiplierRef.current + 0.05) * 100) / 100;
+                    currentMultiplierRef.current = newMultiplier;
+                    
+                    setMultiplier(newMultiplier);
+
+                    if (!cashoutTriggeredRef.current && newMultiplier >= autoCashoutRef.current) {
+                        cashoutTriggeredRef.current = true;
+                        const winnings = safeMultiply(betAmountRef.current, newMultiplier);
+                        
+                        clearInterval(intervalRef.current);
+                        gameActiveRef.current = false;
+                        
+                        setBalance(prev => prev + winnings);
+                        setCashoutMultiplier(newMultiplier);
+                        setIsRunning(false);
+                        setGamePhase('cashedout');
+                        setShowResult(true);
+                        
+                        const profit = winnings - betAmountRef.current;
+                        playerLifetimeProfitRef.current += profit;
+                        consecutiveLossesRef.current = 0;
+                        
+                        setHistory(prev => [newMultiplier, ...prev].slice(0, 8));
+                        
+                        setFeed(prev => [{ 
+                            id: Date.now(), 
+                            text: `Auto-cashout at ${newMultiplier.toFixed(2)}x - Won $${winnings}`, 
+                            type: "cashout" 
+                        }, ...prev].slice(0, 20));
+                        
+                        return;
+                    }
+
+                    if (newMultiplier >= point) {
+                        clearInterval(intervalRef.current);
+                        gameActiveRef.current = false;
+                        
+                        setHasCrashed(true);
+                        setIsRunning(false);
+                        setGamePhase('crashed');
+                        setShowResult(true);
+                        
+                        playerLifetimeProfitRef.current -= betAmountRef.current;
+                        consecutiveLossesRef.current += 1;
+                        
+                        setHistory(prev => [point, ...prev].slice(0, 8));
+                        
+                        setFeed(prev => [{ 
+                            id: Date.now(), 
+                            text: `Crashed at ${point.toFixed(2)}x - Lost $${betAmountRef.current}`, 
+                            type: "crash" 
+                        }, ...prev].slice(0, 20));
+                    }
+                }, 100);
+            }, [balance, betAmount, autoCashout, isRunning, generateCrashPoint, safeMultiply]);
+
+            const handleCashout = useCallback(() => {
+                if (!gameActiveRef.current || !isRunning || cashoutTriggeredRef.current) return;
+                
+                cashoutTriggeredRef.current = true;
+                const currentMultiplier = currentMultiplierRef.current;
+                const winnings = safeMultiply(betAmountRef.current, currentMultiplier);
+                
+                clearInterval(intervalRef.current);
+                gameActiveRef.current = false;
+                
+                setBalance(prev => prev + winnings);
+                setCashoutMultiplier(currentMultiplier);
+                setIsRunning(false);
+                setGamePhase('cashedout');
+                setShowResult(true);
+                
+                const profit = winnings - betAmountRef.current;
+                playerLifetimeProfitRef.current += profit;
+                consecutiveLossesRef.current = 0;
+                
+                setHistory(prev => [currentMultiplier, ...prev].slice(0, 8));
+                
+                setFeed(prev => [{ 
+                    id: Date.now(), 
+                    text: `Cashed out at ${currentMultiplier.toFixed(2)}x - Won $${winnings}`, 
+                    type: "cashout" 
+                }, ...prev].slice(0, 20));
+            }, [isRunning, safeMultiply]);
+
+            const resetGame = useCallback(() => {
+                setShowResult(false);
+                setGamePhase('idle');
+                setMultiplier(1.0);
+                setHasCrashed(false);
+                setCashoutMultiplier(null);
+                setCrashPoint(null);
+                setGoldenRound(false);
+            }, []);
+
+            const quickBets = [10, 25, 50, 100, 250, 500];
+            const buildingHeight = isRunning ? Math.min(multiplier * 35, 370) : 0;
+
+            return (
+                <div className="game-container">
+                    <div className="game-box">
+                        <div className="header">
+                            <h1 className="title">Building Crash</h1>
+                            <div className="status-badge">
+                                <div className={`status-dot ${isRunning ? 'live' : 'waiting'}`} />
+                                <span className="status-text">{isRunning ? 'Live' : 'Waiting'}</span>
+                            </div>
+                        </div>
+
+                        <div className="balance-box">
+                            <div className="balance-row">
+                                <span className="balance-label">Balance</span>
+                                <span className="balance-amount">
+                                    ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+                            {gamePhase === 'cashedout' && showResult && (
+                                <div className="profit-message">
+                                    +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+                                </div>
+                            )}
+                            {gamePhase === 'crashed' && showResult && (
+                                <div className="loss-message">
+                                    -${betAmount.toFixed(2)}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="quick-bets">
+                            {quickBets.map(amount => (
+                                <button
+                                    key={amount}
+                                    onClick={() => !isRunning && setBetAmount(amount)}
+                                    disabled={isRunning}
+                                    className={`quick-bet-btn ${betAmount === amount ? 'active' : ''}`}
+                                >
+                                    ${amount}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="input-group">
+                            <div className="input-wrapper">
+                                <label className="input-label">Bet Amount</label>
+                                <input
+                                    type="number"
+                                    value={betAmount}
+                                    onChange={(e) => setBetAmount(Math.max(0, Number(e.target.value)))}
+                                    disabled={isRunning}
+                                    className="game-input"
+                                />
+                            </div>
+                            <div className="input-wrapper">
+                                <label className="input-label">Auto Cashout</label>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="1.1"
+                                    value={autoCashout}
+                                    onChange={(e) => setAutoCashout(Math.max(1.1, Number(e.target.value)))}
+                                    className="game-input"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="game-area">
+                            <div className="sky">
+                                {[...Array(20)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="star"
+                                        style={{
+                                            left: `${Math.random() * 100}%`,
+                                            top: `${Math.random() * 60}%`,
+                                            animationDelay: `${Math.random() * 2}s`,
+                                            opacity: Math.random() * 0.5 + 0.3,
+                                        }}
+                                    />
+                                ))}
+                            </div>
+
+                            <div className="ground">
+                                <div className="ground-line" />
+                            </div>
+
+                            <div className="building-container">
+                                <div
+                                    className={`building ${hasCrashed ? 'crashed' : ''} ${goldenRound ? 'golden' : ''}`}
+                                    style={{
+                                        height: `${buildingHeight}px`,
+                                        transform: `scaleX(${Math.max(0.6, Math.min(multiplier / 10, 1))})`,
+                                    }}
+                                />
+                            </div>
+
+                            {goldenRound && isRunning && !hasCrashed && (
+                                <div className="golden-banner">
+                                    GOLDEN ROUND
+                                </div>
+                            )}
+
+                            {isRunning && !hasCrashed && (
+                                <div className="multiplier-display">
+                                    {multiplier.toFixed(2)}x
+                                </div>
+                            )}
+
+                            {hasCrashed && showResult && (
+                                <div className="crash-overlay">
+                                    <span className="crash-emoji">&#128165;</span>
+                                    <span className="crash-text">CRASHED!</span>
+                                    <span className="crash-point">at {crashPoint?.toFixed(2)}x</span>
+                                </div>
+                            )}
+
+                            {gamePhase === 'cashedout' && showResult && !hasCrashed && (
+                                <div className="cashout-overlay">
+                                    <span className="cashout-emoji">&#127881;</span>
+                                    <span className="cashout-amount">
+                                        +${safeMultiply(betAmount, cashoutMultiplier).toFixed(2)}
+                                    </span>
+                                    <span className="cashout-multiplier">at {cashoutMultiplier?.toFixed(2)}x</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="buttons-container">
+                            <button
+                                onClick={showResult ? resetGame : startGame}
+                                disabled={isRunning || (betAmount > balance || betAmount <= 0)}
+                                className="start-btn"
+                            >
+                                {showResult ? 'Play Again' : isRunning ? 'Running...' : 'Place Bet'}
+                            </button>
+
+                            <button
+                                onClick={handleCashout}
+                                disabled={!isRunning || cashoutTriggeredRef.current}
+                                className="cashout-btn"
+                            >
+                                Cash Out
+                            </button>
+                        </div>
+
+                        <div className="history-section">
+                            <div className="section-title">
+                                <div className="dot blue" />
+                                Recent Rounds
+                            </div>
+                            <div className="history-list">
+                                {history.map((item, i) => {
+                                    let colorClass = 'gray';
+                                    if (item >= 10) colorClass = 'purple';
+                                    else if (item >= 5) colorClass = 'orange';
+                                    else if (item >= 2) colorClass = 'yellow';
+                                    
+                                    return (
+                                        <span key={i} className={`history-item ${colorClass}`}>
+                                            {item.toFixed(2)}x
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="feed-section">
+                            <div className="section-title">
+                                <div className="dot green pulse" />
+                                Live Feed
+                            </div>
+                            <div className="feed-list">
+                                {feed.map((item) => (
+                                    <div key={item.id} className={`feed-item ${item.type}`}>
+                                        <span className="feed-icon">
+                                            {item.type === 'cashout' ? '💰' : item.type === 'crash' ? '💥' : 'ℹ️'}
+                                        </span>
+                                        <span>{item.text}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BuildingCrashGamePro />);
+    </script>
+</body>
+  </html>
